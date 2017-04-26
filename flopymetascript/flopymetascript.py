@@ -1,12 +1,11 @@
 # coding=utf-8
 import argparse
-import io
 import base64
+import io
 import os
-
-from contextlib import redirect_stdout
-import sys
 import shutil
+import sys
+from contextlib import redirect_stdout
 
 """
 This file handles the commandline interface

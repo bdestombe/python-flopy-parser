@@ -9,6 +9,6 @@ setup(name='flopymetascript',
       author_email='bdestombe@gmail.com',
       install_requires=['numpy', 'nbformat', 'nbconvert', 'flopy'],
       entry_points={
-        "console_scripts": ['flopymetascript = flopymetascript.flopymetascript:main']
-        }
+          "console_scripts": ['flopymetascript = flopymetascript.flopymetascript:main']
+      }
       )
