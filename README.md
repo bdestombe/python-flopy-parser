@@ -28,6 +28,7 @@ pip uninstall flopymetascript
 
 # Example usage from the commandline:
 ## With zipfiles
+Try this first,
 ```bash
 $ flopymetascript --outbytesfile output.zip --inbytesfile input.zip --logfile log.txt
 ```
@@ -39,18 +40,18 @@ written to output.zip. Some logging is written to log.txt. The `$`-sign should b
 $ openssl base64 -in input.zip -out input.zip.b64
 $ flopymetascript --outbytesfile output.zip --inbase64file input.zip.b64
 ```
-input.zip is encoded to base64 and is used as input file for metascript.py
+input.zip is encoded to base64 and is used as input file for flopymetascript
 
 ```bash
 $ flopymetascript --outbytesfile output.zip --inbase64file - < input.zip.b64
 ```
-The content of input.zip.b64 is streamed/piped to metascript.py
+The content of input.zip.b64 is streamed/piped to flopymetascript
 
 ```bash
 $ openssl base64 -in input.zip | flopymetascript --outbytesfile output.zip --inbase64file -
 ```
 The same as what is done previously, however input.zip is encoded and instead of writing it to a file, it is passed
-as stdin to the inbase64file argument.
+as stdin to the inbase64file argument of flopymetascript.
 
 ```bash
 $ openssl base64 -in input.zip | flopymetascript --outbase64file utput.zip --inbase64file - --logfile -
