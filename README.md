@@ -17,7 +17,7 @@ the content and consequences of malicious scripts.
 ```bash
 pip install https://github.com/bdestombe/flopymetascript/zipball/master
 ```
-The flopymetascript package added to system's $PATH and is reachable from any directory. Check if everything works by typing in any directory,
+The flopymetascript package added to system's `$PATH` and is reachable from any directory. Check if everything works by typing in any directory,
 ```bash
 flopymetascript --help
 ```
@@ -32,7 +32,7 @@ pip uninstall flopymetascript
 $ flopymetascript --outbytesfile output.zip --inbytesfile input.zip --logfile log.txt
 ```
 input.zip is a zip-file that contains MODFLOW input files and a single .nam file. Its content is processed and 
-written to output.zip. Some logging is written to log.txt
+written to output.zip. Some logging is written to log.txt. The `$`-sign should be omitted, and only refers to that the command is to be entered in the bash-commandline.
 
 ## Using pipes
 ```bash
@@ -53,7 +53,7 @@ The same as what is done previously, however input.zip is encoded and instead of
 as stdin to the inbase64file argument.
 
 ```bash
-openssl base64 -in input.zip | flopymetascript --outbase64file utput.zip --inbase64file - --logfile -
+$ openssl base64 -in input.zip | flopymetascript --outbase64file utput.zip --inbase64file - --logfile -
 ```
 The log file is printed to stdout.
 
