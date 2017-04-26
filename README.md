@@ -37,6 +37,7 @@ Uninstall with,
 ```bash
 pip uninstall flopymetascript
 ```
+Please see https://gehrcke.de/2014/02/distributing-a-python-command-line-application/ for more information on the package structure.
 
 # Supported
 Currently only tested with a single SEAWAT model. MT3D and MODFLOW models can often also be run by SEAWAT, except when certain weird MODFLOW packages are used. All the packages should be loaded correctly and only the run command (the final two lines) might need some attention.
