@@ -1,6 +1,8 @@
 # flopymetascript
 Converts a zip with MODFLOW input files to a zip containing Flopy script in different formats. This Flopy (Python) script can generate the intitial MODFLOW input files.
 
+<img src="https://raw.githubusercontent.com/bdestombe/flopymetascript/master/assets/figures/workflow.png" alt="workflow" style="width:50;height:20">
+
 It should work for MODFLOW, MT3D, and SEAWAT.
 
 No money is to be made with this service. I you find it useful, please donate to charity (be creative in choosing 
