@@ -68,6 +68,19 @@ def run(bytes_in):
 
 
 def get_doc_info(s):
+    """
+    Is used in load function.
+    
+    usage:
+    s = instance.__doc__
+    info = get_doc_info(s)
+
+    for k_info, v_info in info.items():
+        if k_info in p:
+            typed, description = v_info
+            p[k_info].typed = typed
+            p[k_info].description = description
+    """
     if s:
         p = dict()
 
@@ -101,7 +114,6 @@ def get_doc_info(s):
 
 def load_package(instance):
     """
-
     :param instance: either an instance or a class
     :return:
     """
@@ -109,34 +121,52 @@ def load_package(instance):
     omitted_keys = ['self', 'kwargs', 'args', 'xul', 'yul', 'rotation', 'proj4_str', 'start_datetime']
     none_ansd_keys = ['model']
 
-    p = od()
+    # retreives the instance parameter using inspect
     params = inspect.signature(instance.__init__).parameters
 
-    for k, v in params.items():
-        if k in omitted_keys:
-            continue
-
-        elif k in none_ansd_keys:
-            p[k] = Parameter(None)
-
-        else:
-            if k in instance.__dict__:
-                p[k] = Parameter(instance.__getattribute__(k))
-
-            else:
-                p[k] = Parameter(v.default)
-
-        p[k].default = v.default
-        p[k].kind = v.kind
-
+    #
     s = instance.__doc__
     info = get_doc_info(s)
 
-    for k_info, v_info in info.items():
-        if k_info in p:
-            typed, description = v_info
-            p[k_info].typed = typed
-            p[k_info].description = description
+    # store each parameter in an ordered dict as type Parameter
+    p = od()
+
+    for k, v in params.items():
+
+        # skip funny keys
+        if k in omitted_keys:
+            continue
+
+        # Give None value to certain parameters
+        elif k in none_ansd_keys:
+            p[k] = Parameter(None)
+
+        # For other parameters create value, either from default
+        else:
+
+            # If an instance was passed it has loaded values in __dict__
+            if k in instance.__dict__:
+                p[k] = Parameter(instance.__getattribute__(k))
+
+            # Otherwise use the default value as value
+            else:
+                p[k] = Parameter(v.default)
+
+        # Fill the Parameter object with other information from the inspect
+        p[k].default = v.default
+        p[k].kind = v.kind
+
+        # Add documentation to the parameter
+        if k in info:
+            typed, description = info[k]
+            p[k].typed = typed
+            p[k].description = description
+
+    # for k_info, v_info in info.items():
+    #     if k_info in p:
+    #         typed, description = v_info
+    #         p[k_info].typed = typed
+    #         p[k_info].description = description
 
     return p
 
