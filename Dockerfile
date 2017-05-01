@@ -18,7 +18,7 @@ RUN pip install numpy
 RUN pip install https://github.com/bdestombe/flopymetascript/zipball/master
 RUN pip install --upgrade --no-deps --force-reinstall https://github.com/bdestombe/flopymetascript/zipball/master
 
-ENV fprocess="flopymetascript --outbase64file - --inbase64file -"
+ENV fprocess="flopymetascript --outbase64file - --inbase64file - --logfile -"
 
 HEALTHCHECK --interval=1s CMD [ -e /tmp/.lock ] || exit 1
 
