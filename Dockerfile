@@ -10,11 +10,11 @@ RUN apk add --update curl gcc g++ \
 
 RUN ln -s /usr/include/locale.h /usr/include/xlocale.h
 
-RUN pip install numpy 
+RUN pip install numpy
 
 RUN pip install https://github.com/bdestombe/flopymetascript/zipball/master
 
-ENV fprocess="flopymetascript --inbase64file - --outbase64file -"
+ENV fprocess="flopymetascript --outbase64file - --inbase64file -"
 
 HEALTHCHECK --interval=1s CMD [ -e /tmp/.lock ] || exit 1
 

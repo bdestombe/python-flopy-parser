@@ -136,6 +136,7 @@ def process(inbase64file=None, outbase64file=None,
             inbytes.seek(0)
 
         else:
+            print('No input files are given. I am about to throw an error')
             os.error('No input files are given')
 
         # To prevent error messages when run without arguments
