@@ -121,22 +121,32 @@ def process(inbase64file=None, outbase64file=None,
     :param outbytesfile: File handle with a write bytes attribute of the output zipfile
     :return: 
     """
+
     stdout_buf = io.StringIO()
 
     with redirect_stdout(stdout_buf):
+        if logfile:
+            print('\nRedirected the stdout to a temporary buffer\n')
+
+        if logfile:
+            print('\nAbout to import metafunctions.run\n')
+
         # Because flopy writes stuff to stdout while importing
         from .metafunctions import run
 
         if inbytesfile:
+            print('\ninbytes file handle\n')
             inbytes = inbytesfile
 
         elif inbase64file:
+            print('\ninbase64 file handle\n')
+
             inbytes = io.BytesIO()
             inbytes.write(base64.b64decode(inbase64file.read()))
             inbytes.seek(0)
 
         else:
-            print('No input files are given. I am about to throw an error')
+            print('\nNo input files are given. I am about to throw an error\n')
             os.error('No input files are given')
 
         # To prevent error messages when run without arguments
