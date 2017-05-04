@@ -17,6 +17,7 @@ import nbconvert
 import nbformat
 import nbformat as nbf
 import numpy as np
+from yapf.yapflib.yapf_api import FormatCode
 
 
 def run(bytes_in):
@@ -43,7 +44,8 @@ def run(bytes_in):
         all_nam_files = glob.glob(os.path.join(temp_dir, file_dir, '*.nam')) + \
                         glob.glob(os.path.join(temp_dir, file_dir, '*.NAM'))
 
-        assert len(all_nam_files) == 1, "The zip can only contain a single name file"
+        assert len(
+            all_nam_files) == 1, "The zip can only contain a single name file"
 
         mp = Model(all_nam_files[-1])
         nb = mp.script_model2nb()
@@ -54,10 +56,13 @@ def run(bytes_in):
         ipynb_buff = io.StringIO(nbformat.writes(nb))
         zip_out.writestr('test.ipynb', ipynb_buff.getvalue())
 
-        for out_formats_item, out_formats_ext_item in zip(out_formats, out_formats_ext):
+        for out_formats_item, out_formats_ext_item in zip(
+                out_formats, out_formats_ext):
             ipynb_buff.seek(0)
             zip_out.writestr('test.' + out_formats_ext_item,
-                             nbconvert.export(nbconvert.get_exporter(out_formats_item), ipynb_buff)[0])
+                             nbconvert.export(
+                                 nbconvert.get_exporter(out_formats_item),
+                                 ipynb_buff)[0])
 
         ipynb_buff.close()
         zip_out.close()
@@ -70,6 +75,9 @@ def run(bytes_in):
 def get_doc_info(s):
     """
     Is used in load function.
+    
+    todo:
+    make staticmethod of Model class
     
     usage:
     s = instance.__doc__
@@ -114,17 +122,23 @@ def get_doc_info(s):
 
 def load_package(instance):
     """
+    todo:
+    make staticmethod of Model class
+    
     :param instance: either an instance or a class
     :return:
     """
 
-    omitted_keys = ['self', 'kwargs', 'args', 'xul', 'yul', 'rotation', 'proj4_str', 'start_datetime']
+    omitted_keys = [
+        'self', 'kwargs', 'args', 'xul', 'yul', 'rotation', 'proj4_str',
+        'start_datetime'
+    ]
     none_ansd_keys = ['model']
 
     # retreives the instance parameter using inspect
     params = inspect.signature(instance.__init__).parameters
 
-    #
+    # Obtain a dictionary with parameter info
     s = instance.__doc__
     info = get_doc_info(s)
 
@@ -162,12 +176,6 @@ def load_package(instance):
             p[k].typed = typed
             p[k].description = description
 
-    # for k_info, v_info in info.items():
-    #     if k_info in p:
-    #         typed, description = v_info
-    #         p[k_info].typed = typed
-    #         p[k_info].description = description
-
     return p
 
 
@@ -198,8 +206,13 @@ class Model(object):
 
             f, model_ws = str(self.load_nam.name), str(self.load_nam.parent)
 
-            self.sw = flopy.seawat.Seawat.load(f, version='seawat', exe_name='swt_v4', verbose=False,
-                                               model_ws=model_ws, load_only=load_only)
+            self.sw = flopy.seawat.Seawat.load(
+                f,
+                version='seawat',
+                exe_name='swt_v4',
+                verbose=False,
+                model_ws=model_ws,
+                load_only=load_only)
 
             packagelist = self.sw.get_package_list()
 
@@ -237,6 +250,7 @@ class Model(object):
                 self.parameters[pack_key]['modelname']._value = name
 
     def get_package_constructor(self, name, use_defaults=False):
+        """Constructs a package instance with """
         constructor = self.packages[name.upper()]['class']
 
         p = self.parameters[name]
@@ -262,15 +276,24 @@ class Model(object):
         with open(path, 'r') as file:
             s = file.read()
 
-        print('\n'.join([str(path.absolute()),
-                         len(str(path.absolute())) * '-',
-                         s]))
+        print('\n'.join(
+            [str(path.absolute()), len(str(path.absolute())) * '-', s]))
 
-    def script_kwargs2string(self, name, print_descr=True, width=120, bonus_space=0):
-        sout = [v.print_string2(k, width=width, bonus_space=bonus_space) for k, v in self.parameters[name].items()]
+    def script_kwargs2string(self,
+                             name,
+                             print_descr=True,
+                             width=99,
+                             bonus_space=0):
+        sout = [
+            v.print_string2(k, width=width, bonus_space=bonus_space)
+            for k, v in self.parameters[name].items()
+        ]
 
         if print_descr:
-            descr = [v.print_descr(width=width, bonus_space=bonus_space) for _, v in self.parameters[name].items()]
+            descr = [
+                v.print_descr(width=width, bonus_space=bonus_space)
+                for _, v in self.parameters[name].items()
+            ]
 
             # zip the two lists, then flatten them using itertools, then remove empty lines. Empty lines originate from
             # when the docstring has no description for the specific parameter
@@ -281,7 +304,14 @@ class Model(object):
         else:
             return '\n'.join(sout)
 
-    def script_constructor2string(self, name, width=120, bonus_space=0):
+    def script_constructor2string(self,
+                                  name,
+                                  width=99,
+                                  bonus_space=0,
+                                  use_yapf=True):
+        style = '{based_on_style: google, indent_width: 4, split_before_named_assigns: False, column_limit: ' + str(
+            width) + ', SPLIT_ARGUMENTS_WHEN_COMMA_TERMINATED:True}'
+
         initial_indent = ' ' * bonus_space
 
         k = self.parameters[name].keys()
@@ -296,24 +326,43 @@ class Model(object):
 
         s = prelude2 + kwargs + ')'
 
-        sout = textwrap.wrap(s, width=width, initial_indent=' ' * bonus_space,
-                             subsequent_indent=' ' * (bonus_space + len(prelude2)), break_on_hyphens=False,
-                             break_long_words=False)
+        if use_yapf:
+            s2 = FormatCode(s, style_config=style)[0][:-1]
 
-        return '\n'.join(sout)
+        else:
+            sout = textwrap.wrap(
+                s,
+                width=width,
+                initial_indent=' ' * bonus_space,
+                subsequent_indent=' ' * (bonus_space + len(prelude2)),
+                break_on_hyphens=False,
+                break_long_words=False)
+            s2 = '\n'.join(sout)
 
-    def script_package2string(self, name, print_descr=True, width=120, bonus_space=0):
-        kwargs = self.script_kwargs2string(name, print_descr=print_descr, width=width, bonus_space=bonus_space)
-        constr = self.script_constructor2string(name, width=width, bonus_space=bonus_space)
+        return s2
+
+    def script_package2string(self,
+                              name,
+                              print_descr=True,
+                              width=99,
+                              bonus_space=0):
+        kwargs = self.script_kwargs2string(
+            name,
+            print_descr=print_descr,
+            width=width,
+            bonus_space=bonus_space)
+        constr = self.script_constructor2string(
+            name, width=width, bonus_space=bonus_space)
 
         return ''.join([kwargs, '\n\n', constr])
 
-    def script_model2string(self, print_descr=True, width=120, bonus_space=0):
+    def script_model2string(self, print_descr=True, width=99, bonus_space=0):
         all_modules = ['flopy.modflow', 'flopy.mt3d', 'flopy.seawat']
 
         out = [self.import_statements()]
 
-        unique_modules = set([item['parent_str'] for name, item in self.packages.items()])
+        unique_modules = set(
+            [item['parent_str'] for name, item in self.packages.items()])
 
         for mod in [item for item in all_modules if item in unique_modules]:
             pm = od()
@@ -329,32 +378,44 @@ class Model(object):
 
             self.script_sanitize_modelname(self.sw.name)
 
-            out.append(self.script_package2string(mod, print_descr=print_descr, width=width,
-                                                  bonus_space=bonus_space))
+            out.append(
+                self.script_package2string(
+                    mod,
+                    print_descr=print_descr,
+                    width=width,
+                    bonus_space=bonus_space))
 
             for name, item in self.packages.items():
                 if item['parent_str'] != mod:
                     continue
 
-                self.parameters[name]['model'].value = mod.split('.')[-1].lower()
+                self.parameters[name]['model'].value = mod.split('.')[
+                    -1].lower()
 
                 out.append(
-                    self.script_package2string(name, print_descr=print_descr, width=width, bonus_space=bonus_space))
+                    self.script_package2string(
+                        name,
+                        print_descr=print_descr,
+                        width=width,
+                        bonus_space=bonus_space))
 
         out.append(self.write_run_statements())
         return '\n\n####################\n'.join(out)
 
-    def script_model2nb(self, print_descr=True, width=120, bonus_space=0):
+    def script_model2nb(self, print_descr=True, width=99, bonus_space=0):
         """http://nbviewer.jupyter.org/gist/fperez/9716279"""
 
         nb = nbf.v4.new_notebook()
 
         all_modules = ['flopy.modflow', 'flopy.mt3d', 'flopy.seawat']
 
-        out = [nbf.v4.new_markdown_cell(self.intro(self.sw.name)),
-               nbf.v4.new_code_cell(self.import_statements())]
+        out = [
+            nbf.v4.new_markdown_cell(self.intro(self.sw.name)),
+            nbf.v4.new_code_cell(self.import_statements())
+        ]
 
-        unique_modules = set([item['parent_str'] for name, item in self.packages.items()])
+        unique_modules = set(
+            [item['parent_str'] for name, item in self.packages.items()])
 
         for module in [item for item in all_modules if item in unique_modules]:
             pm = od()
@@ -371,26 +432,42 @@ class Model(object):
             self.script_sanitize_modelname(self.sw.name)
 
             out.append(nbf.v4.new_markdown_cell('# {0}'.format(module)))
-            out.append(nbf.v4.new_code_cell(
-                self.script_package2string(module, print_descr=print_descr, width=width, bonus_space=bonus_space)))
+            out.append(
+                nbf.v4.new_code_cell(
+                    self.script_package2string(
+                        module,
+                        print_descr=print_descr,
+                        width=width,
+                        bonus_space=bonus_space)))
 
             for name, item in self.packages.items():
                 if item['parent_str'] != module:
                     continue
 
-                self.parameters[name]['model'].value = module.split('.')[-1].lower()
+                self.parameters[name]['model'].value = module.split('.')[
+                    -1].lower()
 
                 out.append(nbf.v4.new_markdown_cell('## {0}'.format(name)))
-                out.append(nbf.v4.new_code_cell(
-                    self.script_package2string(name, print_descr=print_descr, width=width, bonus_space=bonus_space)))
+                out.append(
+                    nbf.v4.new_code_cell(
+                        self.script_package2string(
+                            name,
+                            print_descr=print_descr,
+                            width=width,
+                            bonus_space=bonus_space)))
 
         out.append(nbf.v4.new_markdown_cell('# Run this thing!'))
         out.append(nbf.v4.new_code_cell(self.write_run_statements()))
         nb['cells'] = out
         return nb
 
-    def write_script_model2string(self, fn='', print_descr=True, width=120, bonus_space=0):
-        nb = self.script_model2nb(print_descr=print_descr, width=width, bonus_space=bonus_space)
+    def write_script_model2string(self,
+                                  fn='',
+                                  print_descr=True,
+                                  width=99,
+                                  bonus_space=0):
+        nb = self.script_model2nb(
+            print_descr=print_descr, width=width, bonus_space=bonus_space)
 
         with open(fn, 'w') as file:
             nbf.write(nb, file)
@@ -416,7 +493,8 @@ class Model(object):
             else:
                 break
 
-        s = '# {0}.write_input()\n# {0}.run_model()'.format(module.split('.')[-1])
+        s = '# {0}.write_input()\n# {0}.run_model()'.format(
+            module.split('.')[-1])
 
         return s
 
@@ -437,12 +515,8 @@ class Model(object):
         if ncomp == 1:
             return
 
-        ncomp_adjusts = [['DSP', 'dmcoef'],
-                         ['BTN', 'sconc'],
-                         ['RCT', 'sp1'],
-                         ['RCT', 'sp2'],
-                         ['RCT', 'rc1'],
-                         ['RCT', 'rc2'],
+        ncomp_adjusts = [['DSP', 'dmcoef'], ['BTN', 'sconc'], ['RCT', 'sp1'],
+                         ['RCT', 'sp2'], ['RCT', 'rc1'], ['RCT', 'rc2'],
                          ['RCT', 'srconc']]
 
         for adjust_item in ncomp_adjusts:
@@ -459,7 +533,8 @@ class Model(object):
                         key = par_name + str(icomp + 1)
 
                     self.parameters[name][key] = Parameter(dmcoef_item)
-                    self.parameters[name][key].description = dmcoef_old.description
+                    self.parameters[name][
+                        key].description = dmcoef_old.description
 
     def script_sanitize_BTN_mfenheriting(self):
         # Set these variables from the Modflow model (self.parent.mf) unless
@@ -470,14 +545,20 @@ class Model(object):
         if 'BTN' not in self.parameters:
             return
 
-        del_items = ['nlay', 'nrow', 'ncol', 'nper', 'laycon', 'delr', 'delc', 'htop', 'dz', 'perlen', 'nstp', 'tsmult']
+        del_items = [
+            'nlay', 'nrow', 'ncol', 'nper', 'laycon', 'delr', 'delc', 'htop',
+            'dz', 'perlen', 'nstp', 'tsmult'
+        ]
 
         for key in del_items:
             del self.parameters['BTN'][key]
 
     def script_sanitize_unwanted_parameters(self):
-        unwanted = ['extension', 'unitnumber', 'filenames', 'ftlfree', 'ftlunit', 'MFStyleArr', 'DRYCell',
-                    'Legacy99Stor', 'FTLPrint', 'NoWetDryPrint', 'OmitDryBud', 'AltWTSorb']
+        unwanted = [
+            'extension', 'unitnumber', 'filenames', 'ftlfree', 'ftlunit',
+            'MFStyleArr', 'DRYCell', 'Legacy99Stor', 'FTLPrint',
+            'NoWetDryPrint', 'OmitDryBud', 'AltWTSorb'
+        ]
 
         for unwanted_item in unwanted:
             for key in self.parameters:
@@ -547,8 +628,9 @@ class Parameter(object):
         return value
 
     def compressible_fun(self):
-        if isinstance(self.value, dict) and 'k' in self.value[
-            0].dtype.names:  # add check for i, j, k keys in dtype of first entry
+        if isinstance(
+                self.value, dict
+        ) and 'k' in self.value[0].dtype.names:  # add check for i, j, k keys in dtype of first entry
             compressible, _ = self.parse_mflist(self.value)
 
         elif isinstance(self.value, dict):
@@ -573,7 +655,9 @@ class Parameter(object):
         return compressible
 
     def compressed_fun(self):
-        if isinstance(self.value, dict) and 0 in self.value and 'k' in self.value[
+        if isinstance(
+                self.value, dict
+        ) and 0 in self.value and 'k' in self.value[
             0].dtype.names:  # add check for i, j, k keys in dtype of first entry
             _, compressed = self.parse_mflist(self.value)
 
@@ -607,8 +691,11 @@ class Parameter(object):
 
         if isinstance(self.value, dict):
             try:
-                string = pprint.pformat(self.compressed, indent=bonus_space,
-                                        width=max_line_width, compact=True)
+                string = pprint.pformat(
+                    self.compressed,
+                    indent=bonus_space,
+                    width=max_line_width,
+                    compact=True)
             except:
                 string = str(self.compressed)
 
@@ -616,8 +703,7 @@ class Parameter(object):
             string = 'sw'
 
         elif isinstance(self.value, np.ndarray):
-            string = self.parse_array_str(self.compressed,
-                                          self.value.shape,
+            string = self.parse_array_str(self.compressed, self.value.shape,
                                           self.compressible)
 
         elif isinstance(self.value, list):
@@ -628,8 +714,11 @@ class Parameter(object):
 
         else:
             try:
-                string = pprint.pformat(self.value, indent=bonus_space,
-                                        width=max_line_width, compact=True)
+                string = pprint.pformat(
+                    self.value,
+                    indent=bonus_space,
+                    width=max_line_width,
+                    compact=True)
             except:
                 string = str(self.value)
 
@@ -683,6 +772,7 @@ class Parameter(object):
         for i, (k, v) in enumerate(sorted(ar.items())):
             if k == 0 or k == (0, 0):
                 out[k] = v
+
             elif k == (-1, -1):
                 continue
 
@@ -691,8 +781,9 @@ class Parameter(object):
                 if v != prev:
                     out[k] = v
 
+            elif not isinstance(
+                    v, int):  # sometimes there is a placeholder int(0)
 
-            elif not isinstance(v, int):  # sometimes there is a placeholder int(0)
                 if isinstance(prev, int) or not (prev == v).all():
                     out[k] = v
 
@@ -738,7 +829,8 @@ class Parameter(object):
                 else:
                     items_per_squeezed_dim[dim] = ar.size
 
-            most_squeezable_dim = items_per_squeezed_dim.index(min(items_per_squeezed_dim))
+            most_squeezable_dim = items_per_squeezed_dim.index(
+                min(items_per_squeezed_dim))
 
             if ar.size == items_per_squeezed_dim[most_squeezable_dim]:
                 return -1, ar
@@ -775,27 +867,35 @@ class Parameter(object):
         elif compres == -1:
             pre = 'np.array('
             post = ')'
-            ar_str = np.array2string(ar, max_line_width=max_line_width,
-                                     precision=precision,
-                                     suppress_small=suppress_small,
-                                     separator=',', prefix=pre)
+            ar_str = np.array2string(
+                ar,
+                max_line_width=max_line_width,
+                precision=precision,
+                suppress_small=suppress_small,
+                separator=',',
+                prefix=pre)
             ar_str = ' '.join(ar_str.split())
             return pre + ar_str + post
 
         elif compres == 1:
             pre = 'np.broadcast_to('
             post = ', {0})'.format(orig_shape)
-            ar_str = np.array2string(ar, max_line_width=max_line_width,
-                                     precision=precision,
-                                     suppress_small=suppress_small,
-                                     separator=',', prefix=pre)
+            ar_str = np.array2string(
+                ar,
+                max_line_width=max_line_width,
+                precision=precision,
+                suppress_small=suppress_small,
+                separator=',',
+                prefix=pre)
             ar_str = ' '.join(ar_str.split())
             return pre + ar_str + post
 
     def value_print_string(self, key, bonus_space=0):
         return "".join([bonus_space * ' ', key, ' = ', self.string])
 
-    def print_string2(self, key, width=120, bonus_space=0):
+    def print_string2(self, key, width=99, bonus_space=0, use_yapf=True):
+        style = '{based_on_style: google, indent_width: 4, split_before_named_assigns: False, column_limit: ' + str(
+            width) + '}'
         prelude = key + ' = '
 
         if key == 'modflowmodel':
@@ -818,41 +918,64 @@ class Parameter(object):
         else:
             s = self.string
 
-        if key == 'stress_period_data':
-            s1 = self.print_string1(s, prelude, width=width - 1, bonus_space=bonus_space)
-            s1 = '\\\n'.join(s1)
+        if use_yapf:
+            # the :-1 removes the extra \n which is added by yapf
+            s3 = FormatCode(prelude + s, style_config=style)[0][:-1]
+
         else:
-            s1 = self.print_string1(s, prelude, width=width, bonus_space=bonus_space)
-            s1 = '\n'.join(s1)
-        s2 = ' ' * bonus_space + prelude + s1[len(prelude) + bonus_space:]
-        return s2
+            if key == 'stress_period_data':
+                s1 = self.print_string1(
+                    s, prelude, width=width - 1, bonus_space=bonus_space)
+                s1 = '\\\n'.join(s1)
+            else:
+                s1 = self.print_string1(
+                    s, prelude, width=width, bonus_space=bonus_space)
+                s1 = '\n'.join(s1)
+            s3 = ' ' * bonus_space + prelude + s1[len(prelude) + bonus_space:]
+
+        return s3
 
     @staticmethod
-    def print_string1(string, prelude, width=120, bonus_space=0):
-        """If a value contains a string that contains spaces, it will break"""
-        return textwrap.wrap(string, width=width,
-                             initial_indent=' ' * (bonus_space + len(prelude)),
-                             subsequent_indent=' ' * (bonus_space + len(prelude)), break_on_hyphens=False,
-                             break_long_words=False)
+    def print_string1(string, prelude, width=99, bonus_space=0):
+        """
+        Is only used by print_string2 if yapf is not used. 
+        If a value contains a string that contains spaces, it will break
+        """
+        return textwrap.wrap(
+            string,
+            width=width,
+            initial_indent=' ' * (bonus_space + len(prelude)),
+            subsequent_indent=' ' * (bonus_space + len(prelude)),
+            break_on_hyphens=False,
+            break_long_words=False)
 
-    def print_descr(self, width=120, bonus_space=0):
-        s = textwrap.fill(self.description, width=width - 2,
-                          initial_indent=' ' * bonus_space,
-                          subsequent_indent=' ' * (bonus_space + 2),
-                          break_on_hyphens=False, break_long_words=False)
+    def print_descr(self, width=99, bonus_space=0):
+        s = textwrap.fill(
+            self.description,
+            width=width - 2,
+            initial_indent=' ' * bonus_space,
+            subsequent_indent=' ' * (bonus_space + 2),
+            break_on_hyphens=False,
+            break_long_words=False)
         s2 = '\n'.join(['# ' + s1 for s1 in s.splitlines()])
         return s2
 
 
-def uniquend(ar, return_index=False, return_inverse=False,
-             return_counts=False, axis=None):
+def uniquend(ar,
+             return_index=False,
+             return_inverse=False,
+             return_counts=False,
+             axis=None):
     # this is becoming a built-in feature in numpy 1.13
 
     assert isinstance(ar, np.ndarray)
 
     if axis is None:
-        return np.unique(ar, return_index=return_index, return_inverse=return_inverse,
-                         return_counts=return_counts)
+        return np.unique(
+            ar,
+            return_index=return_index,
+            return_inverse=return_inverse,
+            return_counts=return_counts)
 
     ar = np.swapaxes(ar, axis, 0)
     orig_shape, orig_dtype = ar.shape, ar.dtype
@@ -872,8 +995,8 @@ def uniquend(ar, return_index=False, return_inverse=False,
         uniq = np.swapaxes(uniq, 0, axis)
         return uniq
 
-    output = np.unique(consolidated, return_index,
-                       return_inverse, return_counts)
+    output = np.unique(consolidated, return_index, return_inverse,
+                       return_counts)
 
     if not (return_index or return_inverse or return_counts):
         return reshape_uniq(output)

@@ -6,7 +6,6 @@ import os
 import shutil
 import sys
 from contextlib import redirect_stdout
-
 """
 This file handles the commandline interface
 
@@ -70,36 +69,59 @@ the content and consequences of malicious scripts.
 """
 
     class MyParser(argparse.ArgumentParser):
+
         def error(self, message):
             sys.stderr.write('error: %s\n' % message)
             self.print_help()
             sys.exit(2)
 
     class input_action(argparse.Action):
+
         def __call__(self, parser, namespace, values, option_string=None):
             if values.name == "<stdin>" or values.name == "<stdout>":
-                raise argparse.ArgumentTypeError("Cannot use stdin for inbytesfile or stdout for outbytesfile")
+                raise argparse.ArgumentTypeError(
+                    "Cannot use stdin for inbytesfile or stdout for outbytesfile"
+                )
             setattr(namespace, self.dest, values)
 
-    parser = MyParser(prog='flopymetascript',
-                      usage=usage,
-                      description=description,
-                      epilog=epilog)
-    parser.add_argument('--version', action='version', version='%(prog)s 0.1.0')
+    parser = MyParser(
+        prog='flopymetascript',
+        usage=usage,
+        description=description,
+        epilog=epilog)
+    parser.add_argument(
+        '--version', action='version', version='%(prog)s 0.1.0')
 
     inputs = parser.add_mutually_exclusive_group()
     output = parser.add_mutually_exclusive_group()
 
-    inputs.add_argument('--inbase64file', type=argparse.FileType('r'),
-                        required=False, help='Filename or - for stdin of the input zipfile')
-    output.add_argument('--outbase64file', type=argparse.FileType('w'),
-                        required=False, help='Filename or - for stdout of the output zipfile')
-    inputs.add_argument('--inbytesfile', type=argparse.FileType('rb'),
-                        required=False, action=input_action, help='Filename of the input zipfile')
-    output.add_argument('--outbytesfile', type=argparse.FileType('wb'),
-                        required=False, action=input_action, help='Filename of the output zipfile')
-    parser.add_argument('--logfile', type=argparse.FileType('w'),
-                        required=False, help='Filename or - for stdout of the logfile')
+    inputs.add_argument(
+        '--inbase64file',
+        type=argparse.FileType('r'),
+        required=False,
+        help='Filename or - for stdin of the input zipfile')
+    output.add_argument(
+        '--outbase64file',
+        type=argparse.FileType('w'),
+        required=False,
+        help='Filename or - for stdout of the output zipfile')
+    inputs.add_argument(
+        '--inbytesfile',
+        type=argparse.FileType('rb'),
+        required=False,
+        action=input_action,
+        help='Filename of the input zipfile')
+    output.add_argument(
+        '--outbytesfile',
+        type=argparse.FileType('wb'),
+        required=False,
+        action=input_action,
+        help='Filename of the output zipfile')
+    parser.add_argument(
+        '--logfile',
+        type=argparse.FileType('w'),
+        required=False,
+        help='Filename or - for stdout of the logfile')
 
     # Access the arguments as a dictionary
     kwargs = vars(parser.parse_args())
@@ -108,8 +130,10 @@ the content and consequences of malicious scripts.
     process(**kwargs)
 
 
-def process(inbase64file=None, outbase64file=None,
-            inbytesfile=None, outbytesfile=None,
+def process(inbase64file=None,
+            outbase64file=None,
+            inbytesfile=None,
+            outbytesfile=None,
             logfile=None):
     """
     All arguments are filehandles. Assumes sane filehandles, no checking for incompatible stdin stdout combinations.
