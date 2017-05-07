@@ -38,7 +38,12 @@ def run(bytes_in):
                         glob.glob(os.path.join(temp_dir, file_dir, '*.NAM'))
 
         assert len(
-            all_nam_files) == 1, "The zip can only contain a single name file"
+            all_nam_files
+        ) != 0, "The input zip does not contain a .nam nor a .NAM file."
+
+        assert len(
+            all_nam_files) == 1, "The zip can only contain a single name file." + \
+                                 "The nam files in the zip are: {0}".format(all_nam_files)
 
         mp = Model(all_nam_files[-1])
         nb = mp.script_model2nb(use_yapf=False)
@@ -108,7 +113,6 @@ def eval_input(bytes_in):
         print('These files were created directly after loading',
               filenames_sane_output)
 
-        print('model_ws pre ', mp.parameters['flopy.mt3d']['model_ws'])
         d = {'model_ws': temp_dir_made_input}
         mp.change_all_pack_parameter(d)
 
@@ -116,7 +120,10 @@ def eval_input(bytes_in):
             print_descr=False, width=99, bonus_space=0, use_yapf=False)
         print('about to eval the string')
 
-        exec(s)
+        try:
+            exec(s)
+        except:
+            print('The generated scripts contain errors and dont run well')
 
         _, _, filenames_output = next(
             os.walk(temp_dir_made_input), (None, None, []))
@@ -131,10 +138,10 @@ def eval_input(bytes_in):
             filenames_output), 'Not enough inputfiles were written'
 
         for fn in filenames_output:
-            path_out = os.path.join(temp_dir_made_input, fn)
-            hash_out = hashlib.md5(open(path_out, 'rb').read()).hexdigest()
-
             try:
+                path_out = os.path.join(temp_dir_made_input, fn)
+                hash_out = hashlib.md5(open(path_out, 'rb').read()).hexdigest()
+
                 path_sane = os.path.join(temp_dir_sane_input, fn)
                 path_sane_odj = Path(path_sane)
                 path_sane_alt = glob.glob(
