@@ -75,7 +75,7 @@ the content and consequences of malicious scripts.
             self.print_help()
             sys.exit(2)
 
-    class input_action(argparse.Action):
+    class InputAction(argparse.Action):
 
         def __call__(self, parser, namespace, values, option_string=None):
             if values.name == "<stdin>" or values.name == "<stdout>":
@@ -109,13 +109,13 @@ the content and consequences of malicious scripts.
         '--inbytesfile',
         type=argparse.FileType('rb'),
         required=False,
-        action=input_action,
+        action=InputAction,
         help='Filename of the input zipfile')
     output.add_argument(
         '--outbytesfile',
         type=argparse.FileType('wb'),
         required=False,
-        action=input_action,
+        action=InputAction,
         help='Filename of the output zipfile')
     parser.add_argument(
         '--logfile',
@@ -156,7 +156,7 @@ def process(inbase64file=None,
             print('\nAbout to import metafunctions.run\n')
 
         # Because flopy writes stuff to stdout while importing
-        from .metafunctions import run
+        from .metafunctions import run, eval_input
 
         if inbytesfile:
             print('\ninbytes file handle\n')
@@ -177,6 +177,9 @@ def process(inbase64file=None,
         if inbytesfile or inbase64file:
             bytesZip = run(inbytes)
             bytesZip.seek(0)
+
+            # evaluate the input files and write report to log
+            eval_input(inbytes)
 
         if logfile:
             stdout_buf.seek(0)
