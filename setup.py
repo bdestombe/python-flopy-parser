@@ -22,7 +22,7 @@ setup(
     license='New BSD',
     author='Bas des Tombe',
     author_email='bdestombe@gmail.com',
-    install_requires=['numpy', 'nbformat', 'nbconvert', 'flopy', 'yapf'],
+    install_requires=['numpy>=1.12', 'nbformat>=4.3', 'nbconvert>=5.1', 'flopy>=3.2', 'yapf'],
     entry_points={
         "console_scripts":
             ['flopymetascript = flopymetascript.flopymetascript:main']
