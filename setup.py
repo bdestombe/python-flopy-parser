@@ -19,9 +19,10 @@ setup(
     'Converts a zip with MODFLOW input files to a zip containing Flopy script',
     version='0.2.0',
     packages=['flopymetascript'],
-    license='New BSD',
+    license='MIT',
     author='Bas des Tombe',
     author_email='bdestombe@gmail.com',
+    url='https://github.com/bdestombe/flopymetascript',
     install_requires=['numpy>=1.12', 'nbformat>=4.3', 'nbconvert>=5.1', 'flopy>=3.2', 'yapf'],
     entry_points={
         "console_scripts":
