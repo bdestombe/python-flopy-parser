@@ -30,15 +30,15 @@ the content and consequences of malicious scripts.
 # Install
 Enter in the terminal,
 ```bash
-pip install https://github.com/bdestombe/flopymetascript/zipball/master
+$ pip install https://github.com/bdestombe/flopymetascript/zipball/master
 ```
-The flopymetascript package added to system's `$PATH` and is reachable from any directory. Check if everything works by typing in any directory,
+The `$`-sign should be omitted, and only refers to that the command is to be entered in the bash-commandline. The flopymetascript package added to system's `$PATH` and is reachable from any directory. Check if everything works by typing in any directory,
 ```bash
-flopymetascript --help
+$ flopymetascript --help
 ```
 Uninstall with,
 ```bash
-pip uninstall flopymetascript
+$ pip uninstall flopymetascript
 ```
 Please see https://gehrcke.de/2014/02/distributing-a-python-command-line-application/ for more information on the package structure.
 
@@ -52,7 +52,7 @@ Try this first,
 $ flopymetascript --outbytesfile output.zip --inbytesfile input.zip --logfile log.txt
 ```
 input.zip is a zip-file that contains MODFLOW input files and a single .nam file. Its content is processed and 
-written to output.zip. Some logging is written to log.txt. The `$`-sign should be omitted, and only refers to that the command is to be entered in the bash-commandline.
+written to output.zip. Some logging is written to log.txt. 
 
 ## Using pipes
 ```bash
