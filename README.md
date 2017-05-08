@@ -5,11 +5,8 @@ Converts a zip with MODFLOW input files to a zip containing Flopy script in diff
 
 It should work for all packages of MODFLOW, MT3D, and SEAWAT. For a complete list, see the load supported packages in https://github.com/modflowpy/flopy/blob/develop/docs/supported_packages.md .
 
-No money is to be made by the author with this package. I you find it useful, please consider donating to charity (be creative in choosing 
-which one) and send me a note. Thanks! The author is not affiliated with the modflow family nor with Flopy. This 
-converter/generator uses the Flopy load function. Any errors/mistakes in the Flopy load functions propagate to the 
-generated script. The author has absolutely no convidense in that this script is correct and is not responsible for 
-the content and consequences of malicious scripts.
+No money is to be made by the author with this package. The author has absolutely no convidense in that this script is correct and is not responsible for the content and consequences of malicious scripts. I you find it useful, please consider donating to charity (be creative in choosing which one) and send me a note (or create and close an issue). Thanks! The author is not affiliated with the modflow family nor with Flopy. This converter/generator uses the Flopy load function. Any errors/mistakes in the Flopy load functions propagate to the 
+generated script.
 
 # Use cases
 - You are coming from a different modeling environment and want to start using Flopy
@@ -43,7 +40,10 @@ $ pip uninstall flopymetascript
 Please see https://gehrcke.de/2014/02/distributing-a-python-command-line-application/ for more information on the package structure.
 
 # Supported
-Currently only tested with a single SEAWAT model. MT3D and MODFLOW models can often also be run by SEAWAT, except when certain weird MODFLOW packages are used. All the packages should be loaded correctly and only the run command (the final two lines) might need some attention.
+Currently only tested with several MODFLOW and SEAWAT models, on a Mac-platform. 
+
+# Known issues
+- 
 
 # Example usage from the commandline:
 ## With zipfiles
