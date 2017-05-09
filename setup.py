@@ -39,8 +39,8 @@ setup(
     author=__author__,
     author_email='bdestombe@gmail.com',
     url='https://github.com/bdestombe/flopymetascript',
-    download_url=
-    'https://github.com/bdestombe/flopymetascript/archive/0.2.0.tar.gz',
+    download_url='https://github.com/bdestombe/flopymetascript/archive/' +
+                 __version__ + '.tar.gz',
     keywords=['flopy', 'groundwater', 'hydrology'],
     install_requires=[
         'numpy>=1.12', 'nbformat>=4.3', 'nbconvert>=5.1', 'flopy>=3.2', 'yapf'
