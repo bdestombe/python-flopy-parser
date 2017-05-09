@@ -40,6 +40,7 @@ try:
 
     mp = Model(add_pack=p_list)
 
+    # with description
     nb = mp.script_model2nb(use_yapf=False)
     ipynb_buff = io.StringIO(nbformat.writes(nb))
     s = nbconvert.export(nbconvert.get_exporter('markdown'), ipynb_buff)[0]
@@ -53,6 +54,25 @@ try:
     toc = ''.join(toc)
 
     with open('wiki_default_parameters.md', 'w') as f:
+        f.write(toc)
+        f.write(s)
+
+    ipynb_buff.close()
+
+    # without discription
+    nb = mp.script_model2nb(print_descr=False, use_yapf=False)
+    ipynb_buff = io.StringIO(nbformat.writes(nb))
+    s = nbconvert.export(nbconvert.get_exporter('markdown'), ipynb_buff)[0]
+
+    s = s.replace('\n\n```', '\n\n```python')
+
+    p_list_order = list(mp.packages.keys())
+    toc = [
+        '* [' + i + '](#' + i.replace('.', '') + ')\n' for i in p_list_order
+    ]
+    toc = ''.join(toc)
+
+    with open('wiki_default_parameters_without_description.md', 'w') as f:
         f.write(toc)
         f.write(s)
 
