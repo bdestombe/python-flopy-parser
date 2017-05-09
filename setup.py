@@ -28,6 +28,39 @@ except OSError as e:
     with io.open('README.md', encoding="utf-8") as f:
         long_description = f.read()
 
+try:
+    from flopymetascript.model import Model
+    import io
+    import nbformat
+    import zipfile
+    import nbconvert
+    import flopy
+
+    p_list = list(flopy.seawat.Seawat().mfnam_packages.keys())
+
+    mp = Model(add_pack=p_list)
+
+    nb = mp.script_model2nb(use_yapf=False)
+    ipynb_buff = io.StringIO(nbformat.writes(nb))
+    s = nbconvert.export(nbconvert.get_exporter('markdown'), ipynb_buff)[0]
+
+    s = s.replace('\n\n```', '\n\n```python')
+
+    p_list_order = list(mp.packages.keys())
+    toc = [
+        '* [' + i + '](#' + i.replace('.', '') + ')\n' for i in p_list_order
+    ]
+    toc = ''.join(toc)
+
+    with open('wiki_default_parameters.md', 'w') as f:
+        f.write(toc)
+        f.write(s)
+
+    ipynb_buff.close()
+
+except OSError as e:
+    print('unable to update wiki_default_parameters.md')
+
 setup(
     name=__name__,
     description=

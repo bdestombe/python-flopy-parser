@@ -1,5 +1,6 @@
 # coding=utf-8
 import inspect
+import os
 import textwrap
 from collections import OrderedDict as od
 from functools import partial
@@ -157,67 +158,82 @@ class Model(object):
             # if bas:
             bas.ifrefm = True
 
-            # All loaded packages
-            packagelist = self.sw.get_package_list()
+        else:
+            self.sw = flopy.seawat.Seawat()
 
-            loaded_parameters = {}
-            loaded_packages = {}
+        # All loaded packages
+        packagelist = self.sw.get_package_list() + add_pack
 
-            for name in packagelist + add_pack:  # + ['mf', 'mt', 'swt']
-                pm = od()
-                pm['name'] = name
+        if not packagelist:
+            os.error('Noting to do')
 
-                pm['class'] = self.possible_sw_packages[name.lower()]
-                pm['parent_str'] = inspect.getmodule(pm['class']).__package__
+        loaded_parameters = od()
+        loaded_packages = od()
 
-                if name in packagelist and name not in add_pack:
-                    pm['loaded'] = True
-                    pm['instance'] = self.sw.get_package(name=name)
+        for name in packagelist:
+            pm = od()
+            pm['name'] = name
 
-                else:
-                    pm['loaded'] = False
+            pm['class'] = self.possible_sw_packages[name.lower()]
+            pm['parent_str'] = inspect.getmodule(pm['class']).__package__
+
+            if name in packagelist and name not in add_pack:
+                # if in add_pack the default will be used
+                pm['loaded'] = True
+                pm['instance'] = self.sw.get_package(name=name)
+
+            else:
+                pm['loaded'] = False
+
+                try:
                     pm['instance'] = pm['class'](model=self.sw)
 
+                except:
+                    print('{0} Doesnt initiate using loaded or default values'.
+                          format(name))
+                    pm['instance'] = pm['class']
+                    # continue
+
+            try:
                 p = load_package(pm['instance'])
 
                 loaded_parameters[name] = p
                 loaded_packages[name] = pm
 
-            #####################
-            # Order and include 'flopy.modflow', 'flopy.mt3d', 'flopy.seawat'
-            self.parameters = od()
-            self.packages = od()
+            except:
+                print('{0} failed to load'.format(name))
+                continue
 
-            all_modules = ['flopy.modflow', 'flopy.mt3d', 'flopy.seawat']
-            unique_modules = set(
-                [item['parent_str'] for name, item in loaded_packages.items()])
+        # Order and include 'flopy.modflow', 'flopy.mt3d', 'flopy.seawat'
+        self.parameters = od()
+        self.packages = od()
 
-            for mod in [
-                item for item in all_modules if item in unique_modules
-            ]:
-                pm = od()
-                pm['name'] = mod
+        all_modules = ['flopy.modflow', 'flopy.mt3d', 'flopy.seawat']
+        unique_modules = set(
+            [item['parent_str'] for name, item in loaded_packages.items()])
 
-                pm['class'] = self.possible_sw_packages[mod]
-                pm['parent_str'] = 'flopy'
-                pm['loaded'] = False
-                pm['instance'] = pm['class']()
+        for mod in [item for item in all_modules if item in unique_modules]:
+            pm = od()
+            pm['name'] = mod
 
-                self.packages[mod] = pm
-                self.parameters[mod] = load_package(pm['instance'])
+            pm['class'] = self.possible_sw_packages[mod]
+            pm['parent_str'] = 'flopy'
+            pm['loaded'] = False
+            pm['instance'] = pm['class']()
 
-                for name, item in loaded_packages.items():
-                    assert name in loaded_parameters, 'Each loaded package should have a loaded self.parameters'
+            self.packages[mod] = pm
+            self.parameters[mod] = load_package(pm['instance'])
 
-                    if loaded_packages[name]['parent_str'] != mod:
-                        continue
+            for name, item in loaded_packages.items():
+                assert name in loaded_parameters, 'Each loaded package should have a loaded self.parameters'
 
-                    self.packages[name] = loaded_packages[name]
-                    self.parameters[name] = loaded_parameters[name]
+                if loaded_packages[name]['parent_str'] != mod:
+                    continue
 
-                    #####################
+                self.packages[name] = loaded_packages[name]
+                self.parameters[name] = loaded_parameters[name]
 
-                    # sanitize
+        # sanitize
         self.script_sanitize_ncomp()
         self.script_sanitize_BTN_mfenheriting()
         self.script_sanitize_unwanted_parameters()
@@ -255,7 +271,8 @@ class Model(object):
             s = file.read()
 
         print('\n'.join(
-            [str(path.absolute()), len(str(path.absolute())) * '-', s]))
+            [str(path.absolute()),
+             len(str(path.absolute())) * '-', s]))
 
     def script_kwargs2string(self,
                              name,

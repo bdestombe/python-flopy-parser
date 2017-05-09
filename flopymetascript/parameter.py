@@ -230,6 +230,8 @@ class Parameter(object):
     def parse_mflist(ar):
         out = {}
 
+        prev = []
+
         for i, (k, v) in enumerate(sorted(ar.items())):
             if k == 0 or k == (0, 0):
                 out[k] = v
@@ -245,7 +247,7 @@ class Parameter(object):
             elif not isinstance(v, int):
                 # sometimes there is a placeholder int(0)
 
-                if isinstance(prev, int) or not (prev == v).all():
+                if isinstance(prev, int) or not prev == v:
                     out[k] = v
 
             prev = v
@@ -275,8 +277,11 @@ class Parameter(object):
 
         output = np.unique(ar)
 
-        if len(output) == 1:
+        if output.size == 1:
             return 0, output.item()
+
+        elif output.size == 0:
+            return -1, output
 
         else:
             items_per_squeezed_dim = ar.ndim * [0]
@@ -430,6 +435,9 @@ def uniquend(ar,
     # this is becoming a built-in feature in numpy 1.13
 
     assert isinstance(ar, np.ndarray)
+
+    if ar.size == 0:
+        return ar
 
     if axis is None:
         return np.unique(
