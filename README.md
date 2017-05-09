@@ -3,7 +3,8 @@ Converts a zip with MODFLOW input files to a zip containing Flopy script in diff
 
 <img src="https://raw.githubusercontent.com/bdestombe/flopymetascript/master/assets/figures/workflow.png" alt="workflow" style="width:50;height:20">
 
-It should work for all packages of MODFLOW, MT3D, and SEAWAT. For a complete list, see the load supported packages in https://github.com/modflowpy/flopy/blob/develop/docs/supported_packages.md .
+It should work for all packages of MODFLOW, MT3D, and SEAWAT. For a complete list, see the 
+[Packages with default values](./wiki_default_parameters.md) and the load supported packages [on the Flopy website](https://github.com/modflowpy/flopy/blob/develop/docs/supported_packages.md).
 
 No money is to be made by the author with this package. The author has absolutely no convidense in that this script is correct and is not responsible for the content and consequences of malicious scripts. I you find it useful, please consider donating to charity (be creative in choosing which one) and send me a note (or create and close an issue). Thanks! The author is not affiliated with the modflow family nor with Flopy. This converter/generator uses the Flopy load function. Any errors/mistakes in the Flopy load functions propagate to the 
 generated script.
@@ -14,6 +15,7 @@ generated script.
 - Add a description (and default value) to your parameters
 - Check someone else's MODFLOW input files / Flopy script
 - Check homework assignments
+- Start from scratch by adding your own packages
 
 
 # Advantages
@@ -27,7 +29,7 @@ generated script.
 # Install
 Enter in the terminal,
 ```bash
-$ pip install https://github.com/bdestombe/flopymetascript/zipball/master
+$ pip install flopymetascript
 ```
 The `$`-sign should be omitted, and only refers to that the command is to be entered in the bash-commandline. The flopymetascript package added to system's `$PATH` and is reachable from any directory. Check if everything works by typing in any directory,
 ```bash
@@ -37,13 +39,6 @@ Uninstall with,
 ```bash
 $ pip uninstall flopymetascript
 ```
-Please see https://gehrcke.de/2014/02/distributing-a-python-command-line-application/ for more information on the package structure.
-
-# Supported
-Currently only tested with several MODFLOW and SEAWAT models, on a Mac-platform. 
-
-# Known issues
-- 
 
 # Example usage from the commandline:
 ## With zipfiles
@@ -55,6 +50,7 @@ input.zip is a zip-file that contains MODFLOW input files and a single .nam file
 written to output.zip. Some logging is written to log.txt. 
 
 ## Using pipes
+Might be of interest when using flopymetascript as webservice of in docker containers.
 ```bash
 $ openssl base64 -in input.zip -out input.zip.b64
 $ flopymetascript --outbytesfile output.zip --inbase64file input.zip.b64
@@ -80,8 +76,6 @@ The log file is printed to stdout.
 You cannot send both outbase64file and logfile to stdout. They will be mixed and the resulting output file is not readable.
 
 # Example usage in python
-This might need somework and is subject to change in the future.
-
 ```python
 from flopymetascript.flopymetascript import process
 
@@ -92,7 +86,7 @@ from flopymetascript.flopymetascript import process
 fn = 'input.zip'
 inbytesfile = open(fn, 'rb')   # Dont forget the b
 fn = 'output.zip'
-outbytesfile = open(fn, 'rb')  # Dont forget the b
+outbytesfile = open(fn, 'wb')  # Dont forget the b
 fn = 'log.txt'
 logfile = open(fn, 'w')
 
@@ -102,9 +96,19 @@ inbytesfile.close()
 outbytesfile.close()
 logfile.close()
 ```
+or as a module,
+```python
+from flopymetascript.model import Model
+import nbformat
 
+mp = Model(load_nam='path_to_namfile.nam', add_pack=['dis', 'bas6'])
+nb = mp.script_model2nb(use_yapf=False, print_descr=True)
+fn = 'jupyter_notebook.ipynb'
+
+with open(fn, 'w') as f:
+    f.write(nbformat.writes(nb))
+```
 
 # Todo:
-- Add additional packages with default values
 - Add a toggle to turn of the parameter description
 - Add line width as parameter
