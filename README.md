@@ -1,3 +1,4 @@
+[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.573584.svg)](https://doi.org/10.5281/zenodo.573584)
 # flopymetascript
 Converts a zip with MODFLOW input files to a zip containing Flopy script in different formats. This Flopy (Python) script can generate the intitial MODFLOW input files.
 
