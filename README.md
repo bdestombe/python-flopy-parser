@@ -20,8 +20,7 @@ Converts a zip with MODFLOW input files to a zip containing Flopy script in diff
 It should work for all packages of MODFLOW, MT3D, and SEAWAT. For a complete list, see the 
 [Packages with default values](./wiki_default_parameters.md) and the load supported packages [on the Flopy website](https://github.com/modflowpy/flopy/blob/develop/docs/supported_packages.md).
 
-No money is to be made by the author with this package. The author has absolutely no convidense in that this script is correct and is not responsible for the content and consequences of malicious scripts. I you find it useful, please consider donating to charity (be creative in choosing which one) and send me a note (or create and close an issue). Thanks! The author is not affiliated with the modflow family nor with Flopy. This converter/generator uses the Flopy load function. Any errors/mistakes in the Flopy load functions propagate to the 
-generated script.
+The software is available under MIT license. The author has absolutely no convidense in that the software is correct and is not responsible for the content and consequences of malicious scripts. I you find it useful, please consider donating to charity (be creative in choosing which one) and send me a note (or create and close an issue). Thanks! The author is not affiliated with the modflow family nor with Flopy. This converter/generator uses the Flopy load function. Any errors/mistakes in the Flopy load functions propagate silently in to the generated script.
 
 # Use cases
 - You are coming from a different modeling environment and want to start using Flopy
