@@ -2,7 +2,7 @@
 
 # Table of Content
 - [Use Cases](#use-cases)
-- [Advantages](#advantages)
+- [Highlights](#highlights)
 - [Install](#install)
 - [Example usage from the commandline](#example-usage-from-the-commandline)
   - [Using zipfiles from the commandline](#using-zipfiles-from-the-commandline)
@@ -31,7 +31,7 @@ The software is available under MIT license. The author has absolutely no convid
 - Start from scratch by adding your own packages
 
 
-# Advantages
+# Highlights
 - Returns .ipynb, py, tex, html, markdown, and rst file of your MODFLOW input files
 - Consistent and clean markup is used
 - All the parameters are defined explicitely
