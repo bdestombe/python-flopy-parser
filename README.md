@@ -1,4 +1,17 @@
 [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.573584.svg)](https://doi.org/10.5281/zenodo.573584)
+
+# Table of Content
+- [Use Cases](#use-cases)
+- [Advantages](#advantages)
+- [Install](#install)
+- [Example usage from the commandline](#example-usage-from-the-commandline)
+  - [Using zipfiles from the commandline](#using-zipfiles-from-the-commandline)
+  - [Using pipes from the commandline](#using-pipes-from-the-commandline)
+- [Example usage in Python](#example-usage-in-python)
+  - [Using zipfiles in Python](#using-zipfiles-in-python)
+  - [Using as a function in Python](#using-as-a-function-in-python)
+
+
 # flopymetascript
 Converts a zip with MODFLOW input files to a zip containing Flopy script in different formats. This Flopy (Python) script can generate the intitial MODFLOW input files.
 
@@ -42,7 +55,7 @@ $ pip uninstall flopymetascript
 ```
 
 # Example usage from the commandline:
-## With zipfiles
+## Using zipfiles from the commandline
 Try this first,
 ```bash
 $ flopymetascript --outbytesfile output.zip --inbytesfile input.zip --logfile log.txt
@@ -50,8 +63,8 @@ $ flopymetascript --outbytesfile output.zip --inbytesfile input.zip --logfile lo
 input.zip is a zip-file that contains MODFLOW input files and a single .nam file. Its content is processed and 
 written to output.zip. Some logging is written to log.txt. 
 
-## Using pipes
-Might be of interest when using flopymetascript as webservice of in docker containers.
+## Using pipes from the commandline
+Might be of interest when using flopymetascript as webservice.
 ```bash
 $ openssl base64 -in input.zip -out input.zip.b64
 $ flopymetascript --outbytesfile output.zip --inbase64file input.zip.b64
@@ -76,7 +89,8 @@ The log file is printed to stdout.
 
 You cannot send both outbase64file and logfile to stdout. They will be mixed and the resulting output file is not readable.
 
-# Example usage in python
+# Example usage in Python 
+## Using zipfiles in Python
 ```python
 from flopymetascript.flopymetascript import process
 
@@ -97,19 +111,15 @@ inbytesfile.close()
 outbytesfile.close()
 logfile.close()
 ```
-or as a module,
+## Using as a function in Python
 ```python
 from flopymetascript.model import Model
 import nbformat
 
 mp = Model(load_nam='path_to_namfile.nam', add_pack=['dis', 'bas6'])
-nb = mp.script_model2nb(use_yapf=False, print_descr=True)
+nb = mp.script_model2nb(width=99, use_yapf=False, print_descr=True)
 fn = 'jupyter_notebook.ipynb'
 
 with open(fn, 'w') as f:
     f.write(nbformat.writes(nb))
 ```
-
-# Todo:
-- Add a toggle to turn of the parameter description
-- Add line width as parameter
