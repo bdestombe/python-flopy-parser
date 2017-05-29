@@ -111,7 +111,7 @@ outbytesfile.close()
 logfile.close()
 ```
 ## Using as a function in Python
-Loads a name-file and overwrites the `dis` and `bas6` package with the default parameter values. If `dis` and `bas6` were not loaded with the name file, they are added. Extra options are now accessible, such as `print_descr` for printing the parameter description, `width` for the desired line width of the produced script, `use_yapf` to use Google's package to format the produced code (slow).  
+This example loads a name-file and overwrites the `dis` and `bas6` package with the default parameter values. If `dis` and `bas6` were not loaded with the name file, they are added. Extra options are now accessible, such as `print_descr` for printing the parameter description (bool), `width` for the desired line width of the produced script (int, number of characters), `use_yapf` to use Google's package to format the produced code (bool, conversion becomes slow).  
 ```python
 from flopymetascript.model import Model
 
