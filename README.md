@@ -93,23 +93,18 @@ You cannot send both outbase64file and logfile to stdout. They will be mixed and
 ```python
 from flopymetascript.flopymetascript import process
 
-# fn = 'input.zip.b64'
-# inbase64file = open(fn, 'r')
-# fn = 'output.zip.b64'
-# outbase64file = open(fn, 'w')
-fn = 'input.zip'
-inbytesfile = open(fn, 'rb')   # Dont forget the b
-fn = 'output.zip'
-outbytesfile = open(fn, 'wb')  # Dont forget the b
-fn = 'log.txt'
-logfile = open(fn, 'w')
+inbytesfn = 'input.zip'      # Dont forget the b flag when opening the file
+outbytesfn = 'output.zip'.   # Dont forget the b flag when opening the file
+logfn = 'log.txt'
 
-process(inbytesfile=inbytesfile, outbytesfile=outbytesfile, logfile=logfile)
-
-inbytesfile.close()
-outbytesfile.close()
-logfile.close()
+with open(inbytesfn, 'rb') as inbytesfh, \
+        open(outbytesfn, 'wb') as outbytesfh, \
+        open(logfn, 'w') as logfh:
+    process(inbytesfile=inbytesfile, 
+            outbytesfile=outbytesfile, 
+            logfile=logfile)
 ```
+
 ## Using as a function in Python
 This example loads a name-file and overwrites the `dis` and `bas6` package with the default parameter values. If `dis` and `bas6` were not loaded with the name file, they are added. Extra options are now accessible, such as `print_descr` for printing the parameter description (bool), `width` for the desired line width of the produced script (int, number of characters), `use_yapf` to use Google's package to format the produced code (bool, conversion becomes slow).  
 ```python
