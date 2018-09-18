@@ -42,7 +42,7 @@ The software is available under MIT license. The author has absolutely no convid
 # Install
 Enter in the terminal,
 ```bash
-$ pip install flopymetascript
+$ pip install https://github.com/bdestombe/flopymetascript/archive/master.zip
 ```
 The `$`-sign should be omitted, and only refers to that the command is to be entered in the bash-commandline. The flopymetascript package added to system's `$PATH` and is reachable from any directory. Check if everything works by typing in any directory,
 ```bash
