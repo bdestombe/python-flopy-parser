@@ -1,3 +1,17 @@
+[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.573584.svg)](https://doi.org/10.5281/zenodo.573584)
+
+# Table of Content
+- [Use Cases](#use-cases)
+- [Highlights](#highlights)
+- [Install](#install)
+- [Example usage from the commandline](#example-usage-from-the-commandline)
+  - [Using zipfiles from the commandline](#using-zipfiles-from-the-commandline)
+  - [Using pipes from the commandline](#using-pipes-from-the-commandline)
+- [Example usage in Python](#example-usage-in-python)
+  - [Using zipfiles in Python](#using-zipfiles-in-python)
+  - [Using as a function in Python](#using-as-a-function-in-python)
+
+
 # flopymetascript
 Converts a zip with MODFLOW input files to a zip containing Flopy script in different formats. This Flopy (Python) script can generate the intitial MODFLOW input files.
 
@@ -6,8 +20,7 @@ Converts a zip with MODFLOW input files to a zip containing Flopy script in diff
 It should work for all packages of MODFLOW, MT3D, and SEAWAT. For a complete list, see the 
 [Packages with default values](./wiki_default_parameters.md) and the load supported packages [on the Flopy website](https://github.com/modflowpy/flopy/blob/develop/docs/supported_packages.md).
 
-No money is to be made by the author with this package. The author has absolutely no convidense in that this script is correct and is not responsible for the content and consequences of malicious scripts. I you find it useful, please consider donating to charity (be creative in choosing which one) and send me a note (or create and close an issue). Thanks! The author is not affiliated with the modflow family nor with Flopy. This converter/generator uses the Flopy load function. Any errors/mistakes in the Flopy load functions propagate to the 
-generated script.
+The software is available under MIT license. The author has absolutely no convidense in that the software is correct and is not responsible for the content and consequences of malicious scripts. I you find it useful, please consider donating to charity (be creative in choosing which one) and send me a note (or create and close an issue). Thanks! The author is not affiliated with the modflow family nor with Flopy. This converter/generator uses the Flopy load function. Any errors/mistakes in the Flopy load functions propagate silently in to the generated script.
 
 # Use cases
 - You are coming from a different modeling environment and want to start using Flopy
@@ -18,7 +31,7 @@ generated script.
 - Start from scratch by adding your own packages
 
 
-# Advantages
+# Highlights
 - Returns .ipynb, py, tex, html, markdown, and rst file of your MODFLOW input files
 - Consistent and clean markup is used
 - All the parameters are defined explicitely
@@ -29,7 +42,7 @@ generated script.
 # Install
 Enter in the terminal,
 ```bash
-$ pip install flopymetascript
+$ pip install https://github.com/bdestombe/flopymetascript/archive/master.zip
 ```
 The `$`-sign should be omitted, and only refers to that the command is to be entered in the bash-commandline. The flopymetascript package added to system's `$PATH` and is reachable from any directory. Check if everything works by typing in any directory,
 ```bash
@@ -41,7 +54,7 @@ $ pip uninstall flopymetascript
 ```
 
 # Example usage from the commandline:
-## With zipfiles
+## Using zipfiles from the commandline
 Try this first,
 ```bash
 $ flopymetascript --outbytesfile output.zip --inbytesfile input.zip --logfile log.txt
@@ -49,8 +62,8 @@ $ flopymetascript --outbytesfile output.zip --inbytesfile input.zip --logfile lo
 input.zip is a zip-file that contains MODFLOW input files and a single .nam file. Its content is processed and 
 written to output.zip. Some logging is written to log.txt. 
 
-## Using pipes
-Might be of interest when using flopymetascript as webservice of in docker containers.
+## Using pipes from the commandline
+Might be of interest when using flopymetascript as webservice.
 ```bash
 $ openssl base64 -in input.zip -out input.zip.b64
 $ flopymetascript --outbytesfile output.zip --inbase64file input.zip.b64
@@ -75,40 +88,33 @@ The log file is printed to stdout.
 
 You cannot send both outbase64file and logfile to stdout. They will be mixed and the resulting output file is not readable.
 
-# Example usage in python
+# Example usage in Python 
+## Using zipfiles in Python
 ```python
 from flopymetascript.flopymetascript import process
 
-# fn = 'input.zip.b64'
-# inbase64file = open(fn, 'r')
-# fn = 'output.zip.b64'
-# outbase64file = open(fn, 'w')
-fn = 'input.zip'
-inbytesfile = open(fn, 'rb')   # Dont forget the b
-fn = 'output.zip'
-outbytesfile = open(fn, 'wb')  # Dont forget the b
-fn = 'log.txt'
-logfile = open(fn, 'w')
+inbytesfn = 'input.zip'      # Dont forget the b flag when opening the file
+outbytesfn = 'output.zip'.   # Dont forget the b flag when opening the file
+logfn = 'log.txt'
 
-process(inbytesfile=inbytesfile, outbytesfile=outbytesfile, logfile=logfile)
-
-inbytesfile.close()
-outbytesfile.close()
-logfile.close()
+with open(inbytesfn, 'rb') as inbytesfh, \
+        open(outbytesfn, 'wb') as outbytesfh, \
+        open(logfn, 'w') as logfh:
+    process(inbytesfile=inbytesfile, 
+            outbytesfile=outbytesfile, 
+            logfile=logfile)
 ```
-or as a module,
+
+## Using as a function in Python
+This example loads a name-file and overwrites the `dis` and `bas6` package with the default parameter values. If `dis` and `bas6` were not loaded with the name file, they are added. Extra options are now accessible, such as `print_descr` for printing the parameter description (bool), `width` for the desired line width of the produced script (int, number of characters), `use_yapf` to use Google's package to format the produced code (bool, conversion becomes slow).  
 ```python
 from flopymetascript.model import Model
-import nbformat
 
 mp = Model(load_nam='path_to_namfile.nam', add_pack=['dis', 'bas6'])
-nb = mp.script_model2nb(use_yapf=False, print_descr=True)
-fn = 'jupyter_notebook.ipynb'
+fn = 'path_to_jupyter_notebook.ipynb'
 
-with open(fn, 'w') as f:
-    f.write(nbformat.writes(nb))
+mp.write_script_model2string(fn=fn,
+                             print_descr=True,
+                             width=99,
+                             use_yapf=True)
 ```
-
-# Todo:
-- Add a toggle to turn of the parameter description
-- Add line width as parameter
