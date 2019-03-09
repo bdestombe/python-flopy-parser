@@ -15,9 +15,9 @@ process can also be run, where all its arguments are file handles
 
 def main():
     """
-    Provides the command line interface receives either filenames, stdin, or stdout, sanitizes them and calls the  
+    Provides the command line interface receives either filenames, stdin, or stdout, sanitizes them and calls the
     process function with file handles.
-    :return: 
+    :return:
     """
     usage = """
 ## With zipfiles
@@ -143,7 +143,7 @@ def process(inbase64file=None,
     :param outbase64file: File handle with a write utf8 attribute of the output zipfile and is encoded with base64
     :param inbytesfile: File handle with a read bytes attribute of the input zipfile
     :param outbytesfile: File handle with a write bytes attribute of the output zipfile
-    :return: 
+    :return:
     """
 
     stdout_buf = io.StringIO()
@@ -166,7 +166,10 @@ def process(inbase64file=None,
             print('\ninbase64 file handle\n')
 
             inbytes = io.BytesIO()
-            inbytes.write(base64.b64decode(inbase64file.read()))
+            if hasattr(inbase64file, 'read'):
+                inbytes.write(base64.b64decode(inbase64file.read()))
+            else:
+                inbytes.write(base64.b64decode(inbase64file))
             inbytes.seek(0)
 
         else:
@@ -190,7 +193,9 @@ def process(inbase64file=None,
         shutil.copyfileobj(bytesZip, outbytesfile)
 
     elif outbase64file:
-        outbase64file.write(base64.b64encode(bytesZip.read()).decode())
+        outbase64file.write(base64.urlsafe_b64encode(bytesZip.read()).decode())
+        # outb64 = base64.b64encode(bytesZip.read())
+        # outbase64file.write(outb64.decode('ascii'))
 
     else:
         print('Im not doing anything')

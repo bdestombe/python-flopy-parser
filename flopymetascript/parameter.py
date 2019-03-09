@@ -45,7 +45,7 @@ class Parameter(object):
         -1: unable to reduce in size
         0:  a value in a singleton dimension may be used
         1:  broadcastable array
-        
+
         If return_all_data then make 1 -> -1 and 0 remains 0
         """
         if self.return_all_data:
@@ -247,7 +247,7 @@ class Parameter(object):
             elif not isinstance(v, int):
                 # sometimes there is a placeholder int(0)
 
-                if isinstance(prev, int) or not prev == v:
+                if isinstance(prev, int) or not np.all(prev == v):
                     out[k] = v
 
             prev = v
@@ -404,7 +404,7 @@ class Parameter(object):
     @staticmethod
     def print_string1(string, prelude, width=99, bonus_space=0):
         """
-        Is only used by print_string2 if yapf is not used. 
+        Is only used by print_string2 if yapf is not used.
         If a value contains a string that contains spaces, it will break
         """
         return textwrap.wrap(
