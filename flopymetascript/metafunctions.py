@@ -23,19 +23,26 @@ def run(bytes_in):
         out_formats = ['latex', 'html', 'slides', 'rst', 'markdown']
         out_formats_ext = ['tex', 'html', 'slides.html', 'rst', 'md']
 
-        for file in myzipfile.namelist():
-            file_dir = myzipfile.namelist()[0]
-            if file == file_dir:
+        # find nam files:
+        all_nam_files = []
+        for f in myzipfile.infolist():
+            if f.is_dir():
+                # folder
                 continue
 
-            elif file.startswith(file_dir):
-                to_path = temp_dir
-                s = 'Copying {0:s} to {1:s}'.format(file, to_path)
-                print(s)
-                myzipfile.extract(file, to_path)
+            elif f.filename[0] == '_':
+                # private
+                continue
 
-        all_nam_files = glob.glob(os.path.join(temp_dir, file_dir, '*.nam')) + \
-                        glob.glob(os.path.join(temp_dir, file_dir, '*.NAM'))
+            elif os.path.basename(f.filename)[0] == '.':
+                # private
+                continue
+
+            elif f.filename.lower()[-4:] == '.nam':
+                all_nam_files.append(f)
+
+            else:
+                pass
 
         assert len(
             all_nam_files
@@ -45,7 +52,36 @@ def run(bytes_in):
             all_nam_files) == 1, "The zip can only contain a single name file." + \
                                  "The nam files in the zip are: {0}".format(all_nam_files)
 
-        mp = Model(all_nam_files[-1])
+        # directory name nam file
+        nam_dir = os.path.join(os.path.dirname(all_nam_files[0].filename), '')
+
+        for f in myzipfile.infolist():
+            if f.is_dir():
+                # folder
+                continue
+
+            elif f.filename[0] == '_':
+                # private
+                continue
+
+            elif os.path.basename(f.filename)[0] == '.':
+                # private
+                continue
+
+            elif f.filename[:len(nam_dir)] == nam_dir:
+                old_name = f.filename
+                f.filename = f.filename[len(nam_dir):]
+                new_name = f.filename
+                s = 'Copying {0:s} to {1:s}'.format(f.filename, temp_dir)
+                print(s)
+                myzipfile.extract(f, temp_dir)
+
+        # location to nam file. Always on top of directory
+        nam_fp = os.path.join(temp_dir,
+                              os.path.basename(all_nam_files[0].filename))
+
+        assert os.path.isfile(nam_fp), f'{nam_fp} does not exist'
+        mp = Model(nam_fp)
         nb = mp.script_model2nb(use_yapf=False)
 
         buff = io.BytesIO()
@@ -74,25 +110,67 @@ def eval_input(bytes_in):
     myzipfile = zipfile.ZipFile(bytes_in)
 
     with TemporaryDirectory() as temp_dir:
-        for file in myzipfile.namelist():
-            file_dir = myzipfile.namelist()[0]
-            if file == file_dir:
+        # find nam files:
+        all_nam_files = []
+        for f in myzipfile.infolist():
+            if f.is_dir():
+                # folder
                 continue
 
-            elif file.startswith(file_dir):
-                myzipfile.extract(file, temp_dir)
+            elif f.filename[0] == '_':
+                # private
+                continue
 
-        all_nam_files = glob.glob(os.path.join(temp_dir, file_dir, '*.nam')) + \
-                        glob.glob(os.path.join(temp_dir, file_dir, '*.NAM'))
+            elif os.path.basename(f.filename)[0] == '.':
+                # private
+                continue
+
+            elif f.filename.lower()[-4:] == '.nam':
+                all_nam_files.append(f)
+
+            else:
+                pass
 
         assert len(
-            all_nam_files) == 1, "The zip can only contain a single name file"
+            all_nam_files
+        ) != 0, "The input zip does not contain a .nam nor a .NAM file."
 
-        filenames_input = next(
-            os.walk(os.path.join(temp_dir, file_dir)), (None, None, []))[2]
+        assert len(
+            all_nam_files) == 1, "The zip can only contain a single name file." + \
+                                 "The nam files in the zip are: {0}".format(all_nam_files)
+
+        # directory name nam file
+        nam_dir = os.path.join(os.path.dirname(all_nam_files[0].filename), '')
+
+        for f in myzipfile.infolist():
+            if f.is_dir():
+                # folder
+                continue
+
+            elif f.filename[0] == '_':
+                # private
+                continue
+
+            elif os.path.basename(f.filename)[0] == '.':
+                # private
+                continue
+
+            elif f.filename[:len(nam_dir)] == nam_dir:
+                old_name = f.filename
+                f.filename = f.filename[len(nam_dir):]
+                new_name = f.filename
+                s = 'Copying {0:s} to {1:s}'.format(f.filename, temp_dir)
+                print(s)
+                myzipfile.extract(f, temp_dir)
+
+        # location to nam file. Always on top of directory
+        nam_fp = os.path.join(temp_dir,
+                              os.path.basename(all_nam_files[0].filename))
+
+        filenames_input = glob.glob(os.path.join(temp_dir, '*'))
         print(filenames_input)
 
-        mp = Model(all_nam_files[-1])
+        mp = Model(nam_fp)
 
     with TemporaryDirectory() as temp_dir_sane_input, TemporaryDirectory(
     ) as temp_dir_made_input:
