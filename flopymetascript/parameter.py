@@ -117,7 +117,10 @@ class Parameter(object):
 
     def compressed_fun(self):
         # add check for i, j, k keys in dtype of first entry
-        if isinstance(
+        if isinstance(self.value, int):
+            _, compressed = -1, self.value
+
+        elif isinstance(
                 self.value,
                 dict) and 0 in self.value and 'k' in self.value[0].dtype.names:
             _, compressed = self.parse_mflist(self.value)

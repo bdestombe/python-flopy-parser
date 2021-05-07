@@ -15,77 +15,11 @@ if sys.version_info[0] != 3 or sys.version_info[1] < 4:
         """)
     sys.exit(1)
 
-try:
-    import pypandoc
-
-    long_description = pypandoc.convert('README.md', 'rst')
-    long_description = long_description.replace("\r", "")
-
-except OSError as e:
-    import io
-
-    # pandoc is not installed, fallback to using raw contents
-    with io.open('README.md', encoding="utf-8") as f:
-        long_description = f.read()
-
-try:
-    from flopymetascript.model import Model
-    import io
-    import nbformat
-    import zipfile
-    import nbconvert
-    import flopy
-
-    p_list = list(flopy.seawat.Seawat().mfnam_packages.keys())
-
-    mp = Model(add_pack=p_list)
-
-    # with description
-    nb = mp.script_model2nb(use_yapf=False)
-    ipynb_buff = io.StringIO(nbformat.writes(nb))
-    s = nbconvert.export(nbconvert.get_exporter('markdown'), ipynb_buff)[0]
-
-    s = s.replace('\n\n```', '\n\n```python')
-
-    p_list_order = list(mp.packages.keys())
-    toc = [
-        '* [' + i + '](#' + i.replace('.', '') + ')\n' for i in p_list_order
-    ]
-    toc = ''.join(toc)
-
-    with open('wiki_default_parameters.md', 'w') as f:
-        f.write(toc)
-        f.write(s)
-
-    ipynb_buff.close()
-
-    # without discription
-    nb = mp.script_model2nb(print_descr=False, use_yapf=False)
-    ipynb_buff = io.StringIO(nbformat.writes(nb))
-    s = nbconvert.export(nbconvert.get_exporter('markdown'), ipynb_buff)[0]
-
-    s = s.replace('\n\n```', '\n\n```python')
-
-    p_list_order = list(mp.packages.keys())
-    toc = [
-        '* [' + i + '](#' + i.replace('.', '') + ')\n' for i in p_list_order
-    ]
-    toc = ''.join(toc)
-
-    with open('wiki_default_parameters_without_description.md', 'w') as f:
-        f.write(toc)
-        f.write(s)
-
-    ipynb_buff.close()
-
-except OSError as e:
-    print('unable to update wiki_default_parameters.md')
-
 setup(
     name=__name__,
     description=
-    'Converts a zip with MODFLOW input files to a zip containing Flopy script',
-    long_description=long_description,
+    'Converts MODFLOW input files to a Python Flopy script',
+    # long_description=long_description,
     version=__version__,
     packages=['flopymetascript'],
     license='MIT',
@@ -111,3 +45,69 @@ setup(
         "console_scripts":
             ['flopymetascript = flopymetascript.flopymetascript:main']
     })
+
+# try:
+#     import pypandoc
+#
+#     long_description = pypandoc.convert('README.md', 'rst')
+#     long_description = long_description.replace("\r", "")
+#
+# except OSError as e:
+#     import io
+#
+#     # pandoc is not installed, fallback to using raw contents
+#     with io.open('README.md', encoding="utf-8") as f:
+#         long_description = f.read()
+#
+# try:
+#     from flopymetascript.model import Model
+#     import io
+#     import nbformat
+#     import zipfile
+#     import nbconvert
+#     import flopy
+#
+#     p_list = list(flopy.seawat.Seawat().mfnam_packages.keys())
+#
+#     mp = Model(add_pack=p_list)
+#
+#     # with description
+#     nb = mp.script_model2nb(use_yapf=False)
+#     ipynb_buff = io.StringIO(nbformat.writes(nb))
+#     s = nbconvert.export(nbconvert.get_exporter('markdown'), ipynb_buff)[0]
+#
+#     s = s.replace('\n\n```', '\n\n```python')
+#
+#     p_list_order = list(mp.packages.keys())
+#     toc = [
+#         '* [' + i + '](#' + i.replace('.', '') + ')\n' for i in p_list_order
+#     ]
+#     toc = ''.join(toc)
+#
+#     with open('wiki_default_parameters.md', 'w') as f:
+#         f.write(toc)
+#         f.write(s)
+#
+#     ipynb_buff.close()
+#
+#     # without discription
+#     nb = mp.script_model2nb(print_descr=False, use_yapf=False)
+#     ipynb_buff = io.StringIO(nbformat.writes(nb))
+#     s = nbconvert.export(nbconvert.get_exporter('markdown'), ipynb_buff)[0]
+#
+#     s = s.replace('\n\n```', '\n\n```python')
+#
+#     p_list_order = list(mp.packages.keys())
+#     toc = [
+#         '* [' + i + '](#' + i.replace('.', '') + ')\n' for i in p_list_order
+#     ]
+#     toc = ''.join(toc)
+#
+#     with open('wiki_default_parameters_without_description.md', 'w') as f:
+#         f.write(toc)
+#         f.write(s)
+#
+#     ipynb_buff.close()
+#
+# except OSError as e:
+#     print('unable to update wiki_default_parameters.md')

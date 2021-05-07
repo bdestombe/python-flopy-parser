@@ -128,7 +128,8 @@ class Model(object):
     possible_sw_packages['flopy.seawat'] = flopy.seawat.Seawat
 
     def __init__(self, load_nam='', add_pack=[], load_only=None):
-        assert isinstance(add_pack, list)
+        add_pack = list(add_pack)
+        assert isinstance(add_pack, list), repr(add_pack)
 
         for i_pack in add_pack:
             assert i_pack in self.possible_sw_packages.keys()
@@ -237,6 +238,7 @@ class Model(object):
         self.script_sanitize_ncomp()
         self.script_sanitize_BTN_mfenheriting()
         self.script_sanitize_unwanted_parameters()
+        self.script_sanitize_DRT_options()
 
     def script_sanitize_modelname(self, name):
         for pack_key, pack_val in self.parameters.items():
@@ -526,9 +528,9 @@ class Model(object):
     def change_package_parameter(self, d):
         """
         d = {package name: {key_name: value}}
-        
-        :param d: 
-        :return: 
+
+        :param d:
+        :return:
         """
         for pack_name_item, pack_val_item in d.items():
             for key_name_item, key_val_item in pack_val_item.items():
@@ -537,17 +539,18 @@ class Model(object):
                 # assert isinstance(self.parameters[pack_name_item][key_name_item], Parameter)
 
                 # Activates the setter of the Parameter.value
-                self.parameters[pack_name_item][
-                    key_name_item].value = key_val_item
+                if pack_name_item in self.parameters:
+                    self.parameters[pack_name_item][
+                        key_name_item].value = key_val_item
 
     def change_all_pack_parameter(self, d):
         """
         d = {key_name: value}
-        
+
         iterates over all packages
 
-        :param d: 
-        :return: 
+        :param d:
+        :return:
         """
         for pack_name_item, pack_val_item in self.parameters.items():
             for key_name_item, key_val_item in d.items():
@@ -577,3 +580,7 @@ class Model(object):
             for key in self.parameters:
                 if unwanted_item in self.parameters[key]:
                     del self.parameters[key][unwanted_item]
+
+    def script_sanitize_DRT_options(self):
+        if 'DRT' in self.parameters:
+            self.parameters['DRT']['options'].return_all_data = True
