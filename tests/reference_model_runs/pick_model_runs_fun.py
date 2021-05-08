@@ -185,7 +185,7 @@ def test_cbcfile(cbc_fp, cbc_fp_ref):
 
 def load_packages_verbose(fp_nam, test_model_inputref_dir, mf5_exe):
     try:
-        m = flopy.modflow.Modflow.load(fp_nam, exe_name=mf5_exe)
+        m = flopy.modflow.Modflow.load(fp_nam, exe_name=mf5_exe, check=False)
     except Exception as e:
         return None, {'suc': False, 'mes': 'Unable to load', 'dif': repr(e)}
 
