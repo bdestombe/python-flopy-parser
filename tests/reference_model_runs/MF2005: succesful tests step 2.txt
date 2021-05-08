@@ -1,0 +1,169 @@
+Succesful models: etsdrt, l1b2k, testsfr2, ibs2k, l1a2k, twrihfb, bcf2ss, restest, tc2hufv4, twrip, str, twri
+{   'dif': [   '--- etsdrtreference namefile\n',
+               '+++ etsdrtdirect namefile\n',
+               '@@ -377,3 +377,3 @@\n',
+               '- Run end date and time (yyyy/mm/dd hh:mm:ss): 2017/02/02 '
+               '12:53:08\n',
+               '- Elapsed run time:  0.016 Seconds\n',
+               '-\n',
+               '+ Run end date and time (yyyy/mm/dd hh:mm:ss): 2021/05/05 '
+               '14:31:52\n',
+               '+ Elapsed run time:  0.007 Seconds\n',
+               '+\n'],
+    'mes': [],
+    'suc': True}
+
+{   'dif': [   '--- l1b2kreference namefile\n',
+               '+++ l1b2kdirect namefile\n',
+               '@@ -1570,3 +1570,3 @@\n',
+               '- Run end date and time (yyyy/mm/dd hh:mm:ss): 2017/02/02 '
+               '12:53:09\n',
+               '- Elapsed run time:  0.109 Seconds\n',
+               '-\n',
+               '+ Run end date and time (yyyy/mm/dd hh:mm:ss): 2021/05/05 '
+               '14:32:08\n',
+               '+ Elapsed run time:  0.097 Seconds\n',
+               '+\n'],
+    'mes': [],
+    'suc': True}
+
+{   'dif': [   '--- testsfr2reference namefile\n',
+               '+++ testsfr2direct namefile\n',
+               '@@ -19302,3 +19302,3 @@\n',
+               '- Run end date and time (yyyy/mm/dd hh:mm:ss): 2017/02/02 '
+               '12:58:13\n',
+               '- Elapsed run time: 30.609 Seconds\n',
+               '-\n',
+               '+ Run end date and time (yyyy/mm/dd hh:mm:ss): 2021/05/05 '
+               '14:32:28\n',
+               '+ Elapsed run time: 19.632 Seconds\n',
+               '+\n'],
+    'mes': [],
+    'suc': True}
+
+{   'dif': [   '--- ibs2kreference namefile\n',
+               '+++ ibs2kdirect namefile\n',
+               '@@ -1119,3 +1119,3 @@\n',
+               '- Run end date and time (yyyy/mm/dd hh:mm:ss): 2017/02/02 '
+               '12:53:08\n',
+               '- Elapsed run time:  0.032 Seconds\n',
+               '-\n',
+               '+ Run end date and time (yyyy/mm/dd hh:mm:ss): 2021/05/05 '
+               '14:32:33\n',
+               '+ Elapsed run time:  0.009 Seconds\n',
+               '+\n'],
+    'mes': [],
+    'suc': True}
+
+{   'dif': [   '--- l1a2kreference namefile\n',
+               '+++ l1a2kdirect namefile\n',
+               '@@ -8539,3 +8539,3 @@\n',
+               '- Run end date and time (yyyy/mm/dd hh:mm:ss): 2017/02/02 '
+               '12:53:09\n',
+               '- Elapsed run time:  0.468 Seconds\n',
+               '-\n',
+               '+ Run end date and time (yyyy/mm/dd hh:mm:ss): 2021/05/05 '
+               '14:32:33\n',
+               '+ Elapsed run time:  0.182 Seconds\n',
+               '+\n'],
+    'mes': [],
+    'suc': True}
+
+{   'dif': [   '--- twrihfbreference namefile\n',
+               '+++ twrihfbdirect namefile\n',
+               '@@ -585,3 +585,3 @@\n',
+               '- Run end date and time (yyyy/mm/dd hh:mm:ss): 2017/02/02 '
+               '12:58:48\n',
+               '- Elapsed run time:  0.031 Seconds\n',
+               '-\n',
+               '+ Run end date and time (yyyy/mm/dd hh:mm:ss): 2021/05/05 '
+               '14:32:33\n',
+               '+ Elapsed run time:  0.010 Seconds\n',
+               '+\n'],
+    'mes': [],
+    'suc': True}
+
+{   'dif': [   '--- bcf2ssreference namefile\n',
+               '+++ bcf2ssdirect namefile\n',
+               '@@ -489,3 +489,3 @@\n',
+               '- Run end date and time (yyyy/mm/dd hh:mm:ss): 2017/02/02 '
+               '12:53:08\n',
+               '- Elapsed run time:  0.016 Seconds\n',
+               '-\n',
+               '+ Run end date and time (yyyy/mm/dd hh:mm:ss): 2021/05/05 '
+               '14:32:33\n',
+               '+ Elapsed run time:  0.009 Seconds\n',
+               '+\n'],
+    'mes': [],
+    'suc': True}
+
+{   'dif': [   '--- restestreference namefile\n',
+               '+++ restestdirect namefile\n',
+               '@@ -624,3 +624,3 @@\n',
+               '- Run end date and time (yyyy/mm/dd hh:mm:ss): 2017/02/02 '
+               '12:57:15\n',
+               '- Elapsed run time:  0.015 Seconds\n',
+               '-\n',
+               '+ Run end date and time (yyyy/mm/dd hh:mm:ss): 2021/05/05 '
+               '14:32:33\n',
+               '+ Elapsed run time:  0.008 Seconds\n',
+               '+\n'],
+    'mes': [],
+    'suc': True}
+
+{   'dif': [   '--- tc2hufv4reference namefile\n',
+               '+++ tc2hufv4direct namefile\n',
+               '@@ -1669,3 +1669,3 @@\n',
+               '- Run end date and time (yyyy/mm/dd hh:mm:ss): 2017/02/02 '
+               '12:57:41\n',
+               '- Elapsed run time:  0.187 Seconds\n',
+               '-\n',
+               '+ Run end date and time (yyyy/mm/dd hh:mm:ss): 2021/05/05 '
+               '14:32:33\n',
+               '+ Elapsed run time:  0.035 Seconds\n',
+               '+\n'],
+    'mes': [],
+    'suc': True}
+
+{   'dif': [   '--- twripreference namefile\n',
+               '+++ twripdirect namefile\n',
+               '@@ -638,3 +638,3 @@\n',
+               '- Run end date and time (yyyy/mm/dd hh:mm:ss): 2017/02/02 '
+               '12:58:48\n',
+               '- Elapsed run time:  0.016 Seconds\n',
+               '-\n',
+               '+ Run end date and time (yyyy/mm/dd hh:mm:ss): 2021/05/05 '
+               '14:32:34\n',
+               '+ Elapsed run time:  0.008 Seconds\n',
+               '+\n'],
+    'mes': [],
+    'suc': True}
+
+{   'dif': [   '--- strreference namefile\n',
+               '+++ strdirect namefile\n',
+               '@@ -344,3 +344,3 @@\n',
+               '- Run end date and time (yyyy/mm/dd hh:mm:ss): 2017/02/02 '
+               '12:57:15\n',
+               '- Elapsed run time:  0.016 Seconds\n',
+               '-\n',
+               '+ Run end date and time (yyyy/mm/dd hh:mm:ss): 2021/05/05 '
+               '14:35:59\n',
+               '+ Elapsed run time:  0.006 Seconds\n',
+               '+\n'],
+    'mes': [],
+    'suc': True}
+
+{   'dif': [   '--- twrireference namefile\n',
+               '+++ twridirect namefile\n',
+               '@@ -478,3 +478,3 @@\n',
+               '- Run end date and time (yyyy/mm/dd hh:mm:ss): 2017/02/02 '
+               '12:58:47\n',
+               '- Elapsed run time:  0.032 Seconds\n',
+               '-\n',
+               '+ Run end date and time (yyyy/mm/dd hh:mm:ss): 2021/05/05 '
+               '14:35:59\n',
+               '+ Elapsed run time:  0.007 Seconds\n',
+               '+\n'],
+    'mes': [],
+    'suc': True}
+

@@ -9,7 +9,6 @@ if sys.version_info[0] != 3 or sys.version_info[1] < 4:
     print("""
         This script requires Python version 3.4.
         It contains with statements for file handles.
-        
         And it contains TemporaryDirectory from tempfile, 
         which was in introduced in 3.2
         """)
@@ -54,7 +53,6 @@ setup(
 #
 # except OSError as e:
 #     import io
-#
 #     # pandoc is not installed, fallback to using raw contents
 #     with io.open('README.md', encoding="utf-8") as f:
 #         long_description = f.read()

@@ -2,14 +2,95 @@ import glob
 import os
 from difflib import unified_diff
 from pprint import pprint
-from shutil import move, copy2
+from shutil import move, copy2, rmtree
 
 import flopy
-from flopy.mbase import run_model
 import numpy.testing as npt
+from flopy.mbase import run_model
+
+from flopymetascript.model import Model
+
+
+def fun_test_reference_run(modelname, test_example_dir, mf5_exe):
+    assert os.path.exists(test_example_dir), "test_example_dir does not exist"
+    assert os.path.exists(os.path.join(test_example_dir, modelname)), "test_example_dir/modelname does not exist"
+
+    test_model_inputref_dir = os.path.join(test_example_dir, modelname, 'inputref')
+    test_model_inputdirect_dir = os.path.join(test_example_dir, modelname, 'inputdirect')
+    test_model_outputdirect_dir = os.path.join(test_example_dir, modelname, 'outputdirect')
+    test_model_inputmetascript_dir = os.path.join(test_example_dir, modelname, 'inputmetascript')
+    test_model_outputmetascript_dir = os.path.join(test_example_dir, modelname, 'outputmetascript')
+
+    clear_folder = [test_model_inputdirect_dir, test_model_inputdirect_dir,
+                    test_model_inputmetascript_dir, test_model_outputmetascript_dir]
+
+    for fp in clear_folder:
+        if os.path.exists(fp):
+            rmtree(fp)
+
+        os.mkdir(fp)
+
+    # copy reference inputfiles to working dir.
+    input_filelist = glob.glob(os.path.join(test_model_inputref_dir, modelname + '*'))
+    assert input_filelist, 'Reference run folder: test_example_dir/modelname is empty'
+
+    for fp in input_filelist:
+        copy2(fp, test_model_inputdirect_dir)
+
+    fp_nam = os.path.join(test_model_inputref_dir, modelname + '.nam')
+
+    m, report = load_packages_verbose(fp_nam, test_model_inputref_dir, mf5_exe)
+
+    # Prepare reference model to compare heads and flow.
+    # Change Output-Control params to generate heads and flows to compare.
+    # Modify only the files that require chages. Therefore copy all input files from reference folder and overwrite
+    # what is needed.
+    pcks_modified = prepare_model_compare_h_cbc(m)
+
+    # modify only the reference input files to also store heads and cbc
+    m.change_model_ws(test_model_inputdirect_dir)
+
+    for pck in pcks_modified:
+        pck.write_file()
+
+    m.write_name_file()
+
+    # Create reference output
+    suc, mes = test_inputfiles(modelname, test_model_inputdirect_dir, test_model_outputdirect_dir, mf5_exe)
+    assert suc, mes
+
+    # Load reference input files with flopymetascript that also outputs h and cbc.
+    fp_nam = os.path.join(test_model_inputdirect_dir, modelname + '.nam')
+    mp = Model(load_nam=fp_nam)
+
+    mp.change_package_parameter({'flopy.modflow': {'model_ws': test_model_inputmetascript_dir}})
+
+    s = mp.script_model2string(print_descr=False, width=99)
+
+    # Run the generated script that writes the inputfiles
+    exec(s)
+
+    # Runs the generated input files. And move the output files to the output folder
+    suc, mes = test_inputfiles(modelname, test_model_inputmetascript_dir, test_model_outputmetascript_dir, mf5_exe)
+
+    assert suc, mes
+
+    # Compare outputfiles cbc and heads
+    hd_fp_ref = os.path.join(test_model_outputdirect_dir, modelname + '.hds')
+    hd_fp = os.path.join(test_model_outputmetascript_dir, modelname + '.hds')
+
+    assert test_headfile(hd_fp, hd_fp_ref), 'Heads do not match'
+
+    cbc_fp_ref = os.path.join(test_model_outputdirect_dir, modelname + '.cbc')
+    cbc_fp = os.path.join(test_model_outputmetascript_dir, modelname + '.cbc')
+
+    assert test_cbcfile(cbc_fp, cbc_fp_ref), 'Flows do not match'
+
+    pass
 
 
 def test_inputfiles(modelname, test_model_inputdirect_dir, test_model_outputdirect_dir, mf5_exe):
+    """Runs the generated input files. And move the output files to the output folder."""
     input_filelist = glob.glob(os.path.join(test_model_inputdirect_dir, '*'))
 
     try:
@@ -17,7 +98,7 @@ def test_inputfiles(modelname, test_model_inputdirect_dir, test_model_outputdire
                                      silent=True)
     except:
         success = False
-        message = 'Failed during modelrun'
+        message = 'Failed during run with the generated input files'
 
     output_filelist = [f for f in glob.glob(os.path.join(test_model_inputdirect_dir, '*')) if f not in input_filelist]
     for file in output_filelist:

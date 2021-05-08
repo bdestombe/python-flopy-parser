@@ -1,0 +1,41 @@
+Succesful models: etsdrt, l1b2k, testsfr2, ibs2k, l1a2k, twrihfb, bcf2ss, restest, str, twri
+'etsdrt': 
+{'dif': '', 'mes': 'Flows and heads match', 'suc': True}
+
+
+'l1b2k': 
+{'dif': '', 'mes': 'Flows and heads match', 'suc': True}
+
+
+'testsfr2': 
+{'dif': '', 'mes': 'Flows and heads match', 'suc': True}
+
+
+'ibs2k': 
+{'dif': '', 'mes': 'Flows and heads match', 'suc': True}
+
+
+'l1a2k': 
+{'dif': '', 'mes': 'Flows and heads match', 'suc': True}
+
+
+'twrihfb': 
+{'dif': '', 'mes': 'Flows and heads match', 'suc': True}
+
+
+'bcf2ss': 
+{'dif': '', 'mes': 'Flows and heads match', 'suc': True}
+
+
+'restest': 
+{'dif': '', 'mes': 'Flows and heads match', 'suc': True}
+
+
+'str': 
+{'dif': '', 'mes': 'Flows and heads match', 'suc': True}
+
+
+'twri': 
+{'dif': '', 'mes': 'Flows and heads match', 'suc': True}
+
+
