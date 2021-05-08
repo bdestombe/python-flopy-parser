@@ -6,6 +6,9 @@ test.zip
 test_model.py
 flopymetascript/yapf_play.py
 
+*.chk
+*.chk.csv
+
 *.py[cod]
 *.ipynb_checkpoints
 *-checkpoint.ipynb

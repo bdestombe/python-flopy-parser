@@ -24,3 +24,7 @@ def test_write_to_zip():
         process(inbytesfile=inbytesfh,
                 outbytesfile=outbytesfh,
                 logfile=logfh)
+
+    os.remove(outbytesfn)
+    os.remove(logfn)
+    pass
