@@ -1,5 +1,6 @@
 import glob
 import os
+import sys
 from difflib import unified_diff
 from pprint import pprint
 from shutil import move, copy2, rmtree
@@ -9,6 +10,33 @@ import numpy.testing as npt
 from flopy.mbase import run_model
 
 from flopymetascript.model import Model
+
+
+def get_exe_path(exe_name='mf2005'):
+    if sys.platform.lower() == "darwin":
+        platform = "mac"
+        ext = ''
+    elif sys.platform.lower().startswith("linux"):
+        platform = "linux"
+        ext = ''
+    elif "win" in sys.platform.lower():
+        ext = '.exe'
+        is_64bits = sys.maxsize > 2 ** 32
+        if is_64bits:
+            platform = "win64"
+        else:
+            platform = "win32"
+    else:
+        errmsg = (
+            "Could not determine platform"
+            ".  sys.platform is {}".format(sys.platform)
+        )
+        raise Exception(errmsg)
+
+    this_fp = os.path.dirname(os.path.abspath(__file__))
+    fp = os.path.abspath(os.path.join(this_fp, '..', 'mf executables', platform, exe_name + ext))
+    assert os.path.exists(fp), fp + ' Does not exist'
+    return fp
 
 
 def fun_test_reference_run(modelname, test_example_dir, mf5_exe):
@@ -21,7 +49,7 @@ def fun_test_reference_run(modelname, test_example_dir, mf5_exe):
     test_model_inputmetascript_dir = os.path.join(test_example_dir, modelname, 'inputmetascript')
     test_model_outputmetascript_dir = os.path.join(test_example_dir, modelname, 'outputmetascript')
 
-    clear_folder = [test_model_inputdirect_dir, test_model_inputdirect_dir,
+    clear_folder = [test_model_inputdirect_dir, test_model_outputdirect_dir,
                     test_model_inputmetascript_dir, test_model_outputmetascript_dir]
 
     for fp in clear_folder:

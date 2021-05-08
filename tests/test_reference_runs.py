@@ -1,9 +1,9 @@
 import os
 
-from reference_model_runs.pick_model_runs_fun import fun_test_reference_run
+from reference_model_runs.pick_model_runs_fun import fun_test_reference_run, get_exe_path
 
 test_example_dir = os.path.abspath("tests/reference_model_runs/MF2005")
-mf5_exe = os.path.abspath("tests/mf executables/mf2005")
+mf5_exe = get_exe_path(exe_name='mf2005')
 
 
 def test_mf5_ref_run_etsdrt(modelname='etsdrt'):

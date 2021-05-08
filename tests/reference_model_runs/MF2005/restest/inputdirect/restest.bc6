@@ -1,0 +1,5 @@
+        53         0         0     0.000         0         0
+00
+CONSTANT    1.000000E+00                           #Anisotropy factor             
+CONSTANT    2.000000E-01                           #sf1                           
+CONSTANT    1.000000E+04                           #tran                          

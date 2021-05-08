@@ -1,0 +1,5 @@
+        53         0         0     0.000         0         0
+00 
+CONSTANT    1.000000E+00                           #anisotropy factor             
+CONSTANT    2.000000E-01                           #primary storage coefficient layer 1
+CONSTANT    1.000000E+04                           #transmissivity layer 1        
