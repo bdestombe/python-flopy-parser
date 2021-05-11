@@ -1,12 +1,10 @@
 import glob
 import os
 import sys
+import tempfile
 from difflib import unified_diff
 from pprint import pprint
-from random import randint
-from shutil import move, copy2, rmtree
-import tempfile
-
+from shutil import move, copy2
 
 import flopy
 import numpy.testing as npt
@@ -47,20 +45,11 @@ def fun_test_reference_run(modelname, test_example_dir, mf5_exe):
     assert os.path.exists(os.path.join(test_example_dir, modelname)), "test_example_dir/modelname does not exist"
 
     test_model_inputref_dir = os.path.join(test_example_dir, modelname, 'inputref')
-    # test_model_inputdirect_dir = tempfile.TemporaryDirectory()  # os.path.join(test_example_dir, modelname, 'inputdirect')
-    # test_model_outputdirect_dir = tempfile.TemporaryDirectory()  # os.path.join(test_example_dir, modelname, 'outputdirect')
-    # test_model_inputmetascript_dir = tempfile.TemporaryDirectory()  # os.path.join(test_example_dir, modelname, 'inputmetascript')
-    # test_model_outputmetascript_dir = tempfile.TemporaryDirectory()  # os.path.join(test_example_dir, modelname, 'outputmetascript')
 
-    with tempfile.TemporaryDirectory() as test_model_inputdirect_dir, tempfile.TemporaryDirectory() as test_model_outputdirect_dir, tempfile.TemporaryDirectory() as test_model_inputmetascript_dir, tempfile.TemporaryDirectory() as test_model_outputmetascript_dir:
-        # clear_folder = [test_model_inputdirect_dir, test_model_outputdirect_dir,
-        #                 test_model_inputmetascript_dir, test_model_outputmetascript_dir]
-        #
-        # for fp in clear_folder:
-        #     if os.path.exists(fp):
-        #         rmtree(fp)
-        #
-        #     os.mkdir(fp)
+    with tempfile.TemporaryDirectory() as test_model_inputdirect_dir, \
+            tempfile.TemporaryDirectory() as test_model_outputdirect_dir, \
+            tempfile.TemporaryDirectory() as test_model_inputmetascript_dir, \
+            tempfile.TemporaryDirectory() as test_model_outputmetascript_dir:
 
         # copy reference inputfiles to working dir.
         input_filelist = glob.glob(os.path.join(test_model_inputref_dir, modelname + '*'))
@@ -97,7 +86,7 @@ def fun_test_reference_run(modelname, test_example_dir, mf5_exe):
 
         mp.change_package_parameter({'flopy.modflow': {'model_ws': test_model_inputmetascript_dir}})
         # mp.change_package_parameter({'LAK': {'lakarr': test_model_inputmetascript_dir}})
-        s = mp.script_model2string(print_descr=False, width=99, use_yapf=False)
+        s = mp.script_model2string(print_descr=False, width=300, use_yapf=False)
 
         # Run the generated script that writes the inputfiles
         exec(s)
@@ -190,26 +179,31 @@ def test_cbcfile(cbc_fp, cbc_fp_ref):
 
 
 def load_packages_verbose(fp_nam, test_model_inputref_dir, mf5_exe):
-    try:
-        m = flopy.modflow.Modflow.load(fp_nam, exe_name=mf5_exe, check=False)
-    except Exception as e:
-        return None, {'suc': False, 'mes': 'Unable to load', 'dif': repr(e)}
+    m = flopy.modflow.Modflow.load(fp_nam, exe_name=mf5_exe, check=False, verbose=True)
+    # try:
+    #     m = flopy.modflow.Modflow.load(fp_nam, exe_name=mf5_exe, check=False, verbose=True)
+    # except Exception as e:
+    #     return None, {'suc': False, 'mes': 'Unable to load', 'dif': repr(e)}
 
     modelname = m.name
 
     if os.path.exists(os.path.join(test_model_inputref_dir, modelname + '.zon')):
-        try:
-            zon = flopy.modflow.ModflowZon.load(os.path.join(test_model_inputref_dir, modelname + '.zon'), m)
-            flopy.modflow.ModflowZon(m, zone_dict=zon)
-        except Exception as e:
-            return None, {'suc': False, 'mes': 'Unable to load zones with flopy', 'dif': repr(e)}
+        zon = flopy.modflow.ModflowZon.load(os.path.join(test_model_inputref_dir, modelname + '.zon'), m)
+        # flopy.modflow.ModflowZon(m, zone_dict=zon)
+        # try:
+        #     zon = flopy.modflow.ModflowZon.load(os.path.join(test_model_inputref_dir, modelname + '.zon'), m)
+        #     flopy.modflow.ModflowZon(m, zone_dict=zon)
+        # except Exception as e:
+        #     return None, {'suc': False, 'mes': 'Unable to load zones with flopy', 'dif': repr(e)}
 
     if os.path.exists(os.path.join(test_model_inputref_dir, modelname + '.mlt')):
-        try:
-            mlt = flopy.modflow.ModflowMlt.load(os.path.join(test_model_inputref_dir, modelname + '.mlt'), m)
-            flopy.modflow.ModflowMlt(m, mult_dict=mlt)
-        except Exception as e:
-            return None, {'suc': False, 'mes': 'Unable to load Mult Package with flopy', 'dif': repr(e)}
+        mlt = flopy.modflow.ModflowMlt.load(os.path.join(test_model_inputref_dir, modelname + '.mlt'), m)
+        # flopy.modflow.ModflowMlt(m, mult_dict=mlt)
+        # try:
+        #     mlt = flopy.modflow.ModflowMlt.load(os.path.join(test_model_inputref_dir, modelname + '.mlt'), m)
+        #     flopy.modflow.ModflowMlt(m, mult_dict=mlt)
+        # except Exception as e:
+        #     return None, {'suc': False, 'mes': 'Unable to load Mult Package with flopy', 'dif': repr(e)}
 
     return m, {'suc': True, 'mes': '', 'dif': ''}
 

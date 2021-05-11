@@ -16,4 +16,4 @@ mf5_exe = get_exe_path(exe_name='mf2005')
 #     pass
 
 
-fun_test_reference_run('l1a2k', test_example_dir, mf5_exe)
+fun_test_reference_run('testsfr2', test_example_dir, mf5_exe)

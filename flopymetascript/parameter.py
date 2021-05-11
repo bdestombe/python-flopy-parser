@@ -74,6 +74,9 @@ class Parameter(object):
         elif isinstance(var, flopy.utils.util_list.MfList):
             value = var.data
 
+        elif isinstance(var, np.recarray):
+            value = var
+
         elif isinstance(var, list):
             value = list()
 
@@ -134,6 +137,10 @@ class Parameter(object):
             "OC stressperioddata"
             _, compressed = self.parse_mflist(self.value)
 
+        elif isinstance(self.value, np.recarray):
+            # SFR reach data and segment data
+            _, compressed = -1, self.value
+
         elif isinstance(self.value, np.ndarray) and not isinstance(self.value, np.recarray):  # flopy 2D and 3D arrays
             '''
             tries to compress the array. Three compressible options
@@ -160,6 +167,8 @@ class Parameter(object):
 
         if isinstance(self.value, dict):
             try:
+                if not np.isfinite(max_line_width):
+                    max_line_width = 100
                 string = pprint.pformat(
                     self.compressed,
                     indent=bonus_space,
@@ -171,10 +180,18 @@ class Parameter(object):
         elif isinstance(self.value, flopy.seawat.swt.Seawat):
             string = 'sw'
 
-        elif isinstance(self.value, np.ndarray):
+        elif isinstance(self.value, np.ndarray) and not isinstance(self.value, np.recarray):
             string = self.parse_array_str(self.compressed, self.value.shape,
                                           self.compressible)
 
+        elif isinstance(self.value, np.recarray):
+            if not np.isfinite(max_line_width):
+                max_line_width = 100
+            string = pprint.pformat(
+                self.value,
+                indent=bonus_space,
+                width=max_line_width,
+                compact=True)
         elif isinstance(self.value, list):
             string = self.parse_list_str(self.compressed, self.compressible)
 
@@ -183,6 +200,8 @@ class Parameter(object):
 
         else:
             try:
+                if not np.isfinite(max_line_width):
+                    max_line_width = 100
                 string = pprint.pformat(
                     self.value,
                     indent=bonus_space,
