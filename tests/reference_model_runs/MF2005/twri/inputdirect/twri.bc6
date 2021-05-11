@@ -1,8 +1,0 @@
-        53     1E+30         0     0.000         0         0
-010000
-CONSTANT    1.000000E+00                           #Anisotropy factor             
-CONSTANT    1.000000E-03                           #hy                            
-CONSTANT    2.000000E-08                           #vcont                         
-CONSTANT    1.000000E-02                           #tran                          
-CONSTANT    1.000000E-08                           #vcont                         
-CONSTANT    2.000000E-02                           #tran                          
