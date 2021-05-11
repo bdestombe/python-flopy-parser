@@ -117,19 +117,24 @@ class Parameter(object):
 
     def compressed_fun(self):
         # add check for i, j, k keys in dtype of first entry
+        # print(self.value, self.__dict__)
         if isinstance(self.value, int):
             _, compressed = -1, self.value
 
-        elif isinstance(
-                self.value,
-                dict) and 0 in self.value and 'k' in self.value[0].dtype.names:
-            _, compressed = self.parse_mflist(self.value)
+        elif isinstance(self.value, dict) and len(self.value) > 0 and isinstance(list(self.value.values())[0], int):
+            # STR package: iptflg param
+            _, compressed = -1, self.value
+
+        # elif isinstance(
+        #         self.value,
+        #         dict) and 0 in self.value and hasattr(self.value[0], 'dtype') and 'k' in self.value[0].dtype.names:
+        #     _, compressed = self.parse_mflist(self.value)
 
         elif isinstance(self.value, dict):
             "OC stressperioddata"
             _, compressed = self.parse_mflist(self.value)
 
-        elif isinstance(self.value, np.ndarray):  # flopy 2D and 3D arrays
+        elif isinstance(self.value, np.ndarray) and not isinstance(self.value, np.recarray):  # flopy 2D and 3D arrays
             '''
             tries to compress the array. Three compressible options
             -1: unable to reduce in size

@@ -21,9 +21,9 @@ def test_mf5_ref_run_ibs2k(modelname='ibs2k'):
     pass
 
 
-# def test_mf5_ref_run_l1a2k(modelname='l1a2k'):
-#     fun_test_reference_run(modelname, test_example_dir, mf5_exe)
-#     pass
+def test_mf5_ref_run_l1a2k(modelname='l1a2k'):
+    fun_test_reference_run(modelname, test_example_dir, mf5_exe)
+    pass
 
 
 def test_mf5_ref_run_twrihfb(modelname='twrihfb'):
@@ -31,6 +31,7 @@ def test_mf5_ref_run_twrihfb(modelname='twrihfb'):
     pass
 
 
+# Fails with writing differnt records to cbc
 # def test_mf5_ref_run_bcf2ss(modelname='bcf2ss'):
 #     fun_test_reference_run(modelname, test_example_dir, mf5_exe)
 #     pass
@@ -41,9 +42,9 @@ def test_mf5_ref_run_restest(modelname='restest'):
     pass
 
 
-# def test_mf5_ref_run_str(modelname='str'):
-#     fun_test_reference_run(modelname, test_example_dir, mf5_exe)
-#     pass
+def test_mf5_ref_run_str(modelname='str'):
+    fun_test_reference_run(modelname, test_example_dir, mf5_exe)
+    pass
 
 
 def test_mf5_ref_run_twri(modelname='twri'):

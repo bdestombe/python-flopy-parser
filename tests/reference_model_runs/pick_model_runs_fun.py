@@ -3,7 +3,9 @@ import os
 import sys
 from difflib import unified_diff
 from pprint import pprint
+from random import randint
 from shutil import move, copy2, rmtree
+
 
 import flopy
 import numpy.testing as npt
@@ -92,8 +94,8 @@ def fun_test_reference_run(modelname, test_example_dir, mf5_exe):
     mp = Model(load_nam=fp_nam)
 
     mp.change_package_parameter({'flopy.modflow': {'model_ws': test_model_inputmetascript_dir}})
-
-    s = mp.script_model2string(print_descr=False, width=99)
+    # mp.change_package_parameter({'LAK': {'lakarr': test_model_inputmetascript_dir}})
+    s = mp.script_model2string(print_descr=False, width=99, use_yapf=False)
 
     # Run the generated script that writes the inputfiles
     exec(s)
@@ -175,6 +177,8 @@ def test_headfile(hd_fp, hd_fp_ref):
 
 
 def test_cbcfile(cbc_fp, cbc_fp_ref):
+    # cbc1 = flopy.utils.CellBudgetFile(cbc_fp)
+    # cbc2 = flopy.utils.CellBudgetFile(cbc_fp_ref)
     cbc_b = open(cbc_fp, mode='rb').read()
     cbc_ref_b = open(cbc_fp_ref, mode='rb').read()
 
@@ -255,21 +259,11 @@ def prepare_model_compare_h_cbc(m):
     flopy.modflow.mfoc.ModflowOc(model=m, stress_period_data={(0, 0): ['save head', 'save budget']},
                                  unitnumber=[50, 51, 52, 53, 0])
     fhs.append(m.get_package('oc'))
-    # fns = [modelname + '.oc', modelname + '.nam']
 
-    if m.has_package('lpf'):
-        m.lpf.ipakcb = 53
-        m.add_output_file(
-            53, fname=None, package=flopy.modflow.ModflowLpf._ftype()
-        )
-        fhs.append(m.get_package('lpf'))
-        # fns.append(modelname + '.lpf')
-    elif m.has_package('bcf6'):
-        m.bcf6.ipakcb = 53
-        m.add_output_file(
-            53, fname=None, package=flopy.modflow.ModflowBcf._ftype()
-        )
-        fhs.append(m.get_package('bcf6'))
-        # fns.append(modelname + '.bc6')
+    for p in m.get_package_list():
+        if hasattr(m.get_package(p), 'ipakcb'):
+            m.get_package(p).ipakcb = 53
+            m.add_output_file(53, fname=None, package=p)
+            fhs.append(m.get_package(p))
 
     return fhs

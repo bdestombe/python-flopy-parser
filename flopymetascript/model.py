@@ -238,7 +238,8 @@ class Model(object):
         self.script_sanitize_ncomp()
         self.script_sanitize_BTN_mfenheriting()
         self.script_sanitize_unwanted_parameters()
-        self.script_sanitize_DRT_options()
+        self.script_sanitize_return_all_data()
+        self.script_sanitize_ensure_2d()
 
     def script_sanitize_modelname(self, name):
         for pack_key, pack_val in self.parameters.items():
@@ -573,7 +574,7 @@ class Model(object):
         unwanted = [
             'extension', 'unitnumber', 'filenames', 'ftlfree', 'ftlunit',
             'MFStyleArr', 'DRYCell', 'Legacy99Stor', 'FTLPrint',
-            'NoWetDryPrint', 'OmitDryBud', 'AltWTSorb'
+            'NoWetDryPrint', 'OmitDryBud', 'AltWTSorb', 'dtype'
         ]
 
         for unwanted_item in unwanted:
@@ -581,6 +582,22 @@ class Model(object):
                 if unwanted_item in self.parameters[key]:
                     del self.parameters[key][unwanted_item]
 
-    def script_sanitize_DRT_options(self):
-        if 'DRT' in self.parameters:
-            self.parameters['DRT']['options'].return_all_data = True
+    def script_sanitize_return_all_data(self):
+        mal_params = {
+            'DRT': ['options'],
+            'LAK': ['flux_data', 'sill_data']}
+        for pck, params in mal_params.items():
+            for param in params:
+                if pck in self.parameters:
+                    self.parameters[pck][param].return_all_data = True
+
+        pass
+
+    def script_sanitize_ensure_2d(self):
+        if 'EVT' in self.parameters and self.parameters['EVT']['surf'].value.ndim == 4:
+            self.parameters['EVT']['surf'].value = self.parameters['EVT']['surf'].value[0, 0]
+
+        if 'LAK' in self.parameters and self.parameters['LAK']['lakarr'].value.ndim == 4:
+            self.parameters['LAK']['lakarr'].value = self.parameters['LAK']['lakarr'].value[0]
+
+        pass
