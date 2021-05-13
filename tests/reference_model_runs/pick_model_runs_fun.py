@@ -40,11 +40,11 @@ def get_exe_path(exe_name='mf2005'):
     return fp
 
 
-def fun_test_reference_run(modelname, test_example_dir, mf5_exe):
-    assert os.path.exists(test_example_dir), "test_example_dir does not exist"
-    assert os.path.exists(os.path.join(test_example_dir, modelname)), "test_example_dir/modelname does not exist"
+def fun_test_reference_run(modelname, test_model_inputref_dir, mf5_exe):
+    assert os.path.exists(test_model_inputref_dir), "test_example_dir does not exist"
+    # assert os.path.exists(os.path.join(test_example_dir, modelname)), "test_example_dir/modelname does not exist"
 
-    test_model_inputref_dir = os.path.join(test_example_dir, modelname, 'inputref')
+    # test_model_inputref_dir = os.path.join(test_example_dir, modelname, 'inputref')
 
     with tempfile.TemporaryDirectory() as test_model_inputdirect_dir, \
             tempfile.TemporaryDirectory() as test_model_outputdirect_dir, \
@@ -60,16 +60,16 @@ def fun_test_reference_run(modelname, test_example_dir, mf5_exe):
 
         fp_nam = os.path.join(test_model_inputref_dir, modelname + '.nam')
 
-        m, report = load_packages_verbose(fp_nam, test_model_inputref_dir, mf5_exe)
+        m, report = load_packages_verbose(fp_nam, mf5_exe)
+
+        # modify only the reference input files to also store heads and cbc
+        m.change_model_ws(test_model_inputdirect_dir)
 
         # Prepare reference model to compare heads and flow.
         # Change Output-Control params to generate heads and flows to compare.
         # Modify only the files that require chages. Therefore copy all input files from reference folder and overwrite
         # what is needed.
         pcks_modified = prepare_model_compare_h_cbc(m)
-
-        # modify only the reference input files to also store heads and cbc
-        m.change_model_ws(test_model_inputdirect_dir)
 
         for pck in pcks_modified:
             pck.write_file()
@@ -178,8 +178,16 @@ def test_cbcfile(cbc_fp, cbc_fp_ref):
     return suc
 
 
-def load_packages_verbose(fp_nam, test_model_inputref_dir, mf5_exe):
-    m = flopy.modflow.Modflow.load(fp_nam, exe_name=mf5_exe, check=False, verbose=True)
+def load_packages_verbose(fp_nam, mf5_exe):
+    # m = flopy.modflow.Modflow.load(fp_nam, exe_name=mf5_exe, check=False, verbose=True)
+    assert os.path.exists(fp_nam), 'fp_nam does not exist'
+    model_ws = os.path.dirname(fp_nam)
+    m = flopy.seawat.Seawat.load(
+        os.path.basename(fp_nam),
+        version='seawat',
+        exe_name=mf5_exe,
+        verbose=True,
+        model_ws=model_ws)
     # try:
     #     m = flopy.modflow.Modflow.load(fp_nam, exe_name=mf5_exe, check=False, verbose=True)
     # except Exception as e:
@@ -187,8 +195,8 @@ def load_packages_verbose(fp_nam, test_model_inputref_dir, mf5_exe):
 
     modelname = m.name
 
-    if os.path.exists(os.path.join(test_model_inputref_dir, modelname + '.zon')):
-        zon = flopy.modflow.ModflowZon.load(os.path.join(test_model_inputref_dir, modelname + '.zon'), m)
+    if os.path.exists(os.path.join(model_ws, modelname + '.zon')):
+        zon = flopy.modflow.ModflowZon.load(os.path.join(model_ws, modelname + '.zon'), m)
         # flopy.modflow.ModflowZon(m, zone_dict=zon)
         # try:
         #     zon = flopy.modflow.ModflowZon.load(os.path.join(test_model_inputref_dir, modelname + '.zon'), m)
@@ -196,8 +204,8 @@ def load_packages_verbose(fp_nam, test_model_inputref_dir, mf5_exe):
         # except Exception as e:
         #     return None, {'suc': False, 'mes': 'Unable to load zones with flopy', 'dif': repr(e)}
 
-    if os.path.exists(os.path.join(test_model_inputref_dir, modelname + '.mlt')):
-        mlt = flopy.modflow.ModflowMlt.load(os.path.join(test_model_inputref_dir, modelname + '.mlt'), m)
+    if os.path.exists(os.path.join(model_ws, modelname + '.mlt')):
+        mlt = flopy.modflow.ModflowMlt.load(os.path.join(model_ws, modelname + '.mlt'), m)
         # flopy.modflow.ModflowMlt(m, mult_dict=mlt)
         # try:
         #     mlt = flopy.modflow.ModflowMlt.load(os.path.join(test_model_inputref_dir, modelname + '.mlt'), m)

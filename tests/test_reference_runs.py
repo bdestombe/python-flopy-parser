@@ -12,32 +12,32 @@ mf5_exe = get_exe_path(exe_name='mf2005')
 
 
 def test_mf5_ref_run_etsdrt(modelname='etsdrt'):
-    fun_test_reference_run(modelname, test_example_dir, mf5_exe)
+    fun_test_reference_run(modelname, os.path.join(test_example_dir, modelname, 'inputref'), mf5_exe)
     pass
 
 
 def test_mf5_ref_run_l1b2k(modelname='l1b2k'):
-    fun_test_reference_run(modelname, test_example_dir, mf5_exe)
+    fun_test_reference_run(modelname, os.path.join(test_example_dir, modelname, 'inputref'), mf5_exe)
     pass
 
 
 def test_mf5_ref_run_testsfr2(modelname='testsfr2'):
-    fun_test_reference_run(modelname, test_example_dir, mf5_exe)
+    fun_test_reference_run(modelname, os.path.join(test_example_dir, modelname, 'inputref'), mf5_exe)
     pass
 
 
 def test_mf5_ref_run_ibs2k(modelname='ibs2k'):
-    fun_test_reference_run(modelname, test_example_dir, mf5_exe)
+    fun_test_reference_run(modelname, os.path.join(test_example_dir, modelname, 'inputref'), mf5_exe)
     pass
 
 
 def test_mf5_ref_run_l1a2k(modelname='l1a2k'):
-    fun_test_reference_run(modelname, test_example_dir, mf5_exe)
+    fun_test_reference_run(modelname, os.path.join(test_example_dir, modelname, 'inputref'), mf5_exe)
     pass
 
 
 def test_mf5_ref_run_twrihfb(modelname='twrihfb'):
-    fun_test_reference_run(modelname, test_example_dir, mf5_exe)
+    fun_test_reference_run(modelname, os.path.join(test_example_dir, modelname, 'inputref'), mf5_exe)
     pass
 
 
@@ -48,7 +48,7 @@ def test_mf5_ref_run_twrihfb(modelname='twrihfb'):
 
 
 def test_mf5_ref_run_restest(modelname='restest'):
-    fun_test_reference_run(modelname, test_example_dir, mf5_exe)
+    fun_test_reference_run(modelname, os.path.join(test_example_dir, modelname, 'inputref'), mf5_exe)
     pass
 
 
@@ -60,15 +60,15 @@ def test_mf5_ref_run_restest(modelname='restest'):
 
 
 def test_mf5_ref_run_twrip(modelname='twrip'):
-    fun_test_reference_run(modelname, test_example_dir, mf5_exe)
+    fun_test_reference_run(modelname, os.path.join(test_example_dir, modelname, 'inputref'), mf5_exe)
     pass
 
 
 def test_mf5_ref_run_str(modelname='str'):
-    fun_test_reference_run(modelname, test_example_dir, mf5_exe)
+    fun_test_reference_run(modelname, os.path.join(test_example_dir, modelname, 'inputref'), mf5_exe)
     pass
 
 
 def test_mf5_ref_run_twri(modelname='twri'):
-    fun_test_reference_run(modelname, test_example_dir, mf5_exe)
+    fun_test_reference_run(modelname, os.path.join(test_example_dir, modelname, 'inputref'), mf5_exe)
     pass
