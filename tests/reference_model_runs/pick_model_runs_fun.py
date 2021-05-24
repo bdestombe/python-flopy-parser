@@ -9,6 +9,7 @@ from shutil import move, copy2
 import flopy
 import numpy.testing as npt
 from flopy.mbase import run_model
+import numpy as np
 
 from flopymetascript.model import Model
 
@@ -40,7 +41,7 @@ def get_exe_path(exe_name='mf2005'):
     return fp
 
 
-def fun_test_reference_run(modelname, test_model_inputref_dir, mf5_exe, test_hds=True, test_cbc=True):
+def fun_test_reference_run(modelname, test_model_inputref_dir, mf5_exe, test_hds=True, test_cbc=True, test_ucn=True):
     assert os.path.exists(test_model_inputref_dir), "test_example_dir does not exist"
     # assert os.path.exists(os.path.join(test_example_dir, modelname)), "test_example_dir/modelname does not exist"
 
@@ -88,12 +89,18 @@ def fun_test_reference_run(modelname, test_model_inputref_dir, mf5_exe, test_hds
         mp = Model(load_nam=fp_nam)
 
         mp.change_package_parameter({'flopy.modflow': {'model_ws': test_model_inputmetascript_dir}})
+
+        if 'flopy.mt3d' in mp.parameters:
+            mp.change_package_parameter({'flopy.mt3d': {'model_ws': test_model_inputmetascript_dir}})
+
+        if 'flopy.seawat' in mp.parameters:
+            mp.change_package_parameter({'flopy.seawat': {'model_ws': test_model_inputmetascript_dir}})
+
         # mp.change_package_parameter({'LAK': {'lakarr': test_model_inputmetascript_dir}})
         s = mp.script_model2string(print_descr=False, width=300, use_yapf=False)
 
         # Run the generated script that writes the inputfiles
         exec(s)
-        # assert len(model.package_units) == len(set(model.package_units)), 'Unit number is used multiple times'
 
         # Runs the generated input files. And move the output files to the output folder
         suc, mes = test_inputfiles(modelname, test_model_inputmetascript_dir, test_model_outputmetascript_dir, mf5_exe)
@@ -105,7 +112,6 @@ def fun_test_reference_run(modelname, test_model_inputref_dir, mf5_exe, test_hds
             ls_fp_ref = os.path.join(test_model_outputmetascript_dir, model.lst.file_name[0])#modelname + '.' + m._mf.lst.extension[0])
 
             glob.glob(test_model_outputmetascript_dir + '/*')
-
             test_listfile(ls_fp, ls_fp_ref)
 
         # Compare outputfiles cbc and heads
@@ -121,6 +127,14 @@ def fun_test_reference_run(modelname, test_model_inputref_dir, mf5_exe, test_hds
 
             assert test_cbcfile(cbc_fp, cbc_fp_ref), 'Flows do not match'
 
+        if test_ucn:
+            for i in range(mp.parameters['BTN']['ncomp'].value):
+                icomp = i + 1
+                ucn_fp_ref = os.path.join(test_model_outputdirect_dir, 'MT3D{0:03d}.UCN'.format(icomp))
+                ucn_fp = os.path.join(test_model_outputmetascript_dir, 'MT3D{0:03d}.UCN'.format(icomp))
+
+                assert test_ucnfile(ucn_fp, ucn_fp_ref, model=m), 'Concentrations do not match: MT3D{0:03d}.UCN'.format(icomp)
+
     pass
 
 
@@ -132,7 +146,7 @@ def test_inputfiles(modelname, test_model_inputdirect_dir, test_model_outputdire
                                  silent=True)
     if not success:
         try:
-            with open(os.path.join(test_model_inputdirect_dir, modelname + '.lst')) as fh:
+            with open(os.path.join(test_model_outputdirect_dir, modelname + '.lst')) as fh:
                 print(''.join(fh.readlines()))
         except:
             print('NO LISTFILE')
@@ -208,13 +222,30 @@ def test_headfile(hd_fp, hd_fp_ref):
     return suc
 
 
+def test_ucnfile(ucn_fp, ucn_fp_ref, model=None):
+    ucn_b = open(ucn_fp, mode='rb').read()
+    ucn_ref_b = open(ucn_fp_ref, mode='rb').read()
+
+    suc = ucn_ref_b == ucn_b
+
+    if not suc:
+        ucn1 = flopy.utils.UcnFile(ucn_fp, model=model)
+        ucn2 = flopy.utils.UcnFile(ucn_fp_ref, model=model)
+        suc = np.all(np.isclose(ucn1.get_alldata(), ucn2.get_alldata()))
+
+    return suc
+
+
 def test_cbcfile(cbc_fp, cbc_fp_ref):
-    # cbc1 = flopy.utils.CellBudgetFile(cbc_fp)
-    # cbc2 = flopy.utils.CellBudgetFile(cbc_fp_ref)
     cbc_b = open(cbc_fp, mode='rb').read()
     cbc_ref_b = open(cbc_fp_ref, mode='rb').read()
 
     suc = cbc_ref_b == cbc_b
+
+    if not suc:
+        cbc1 = flopy.utils.CellBudgetFile(cbc_fp)
+        cbc2 = flopy.utils.CellBudgetFile(cbc_fp_ref)
+        suc = cbc1.recorddict == cbc2.recorddict
 
     return suc
 
@@ -321,7 +352,7 @@ def prepare_model_compare_h_cbc(m, save_hds=True, save_cbc=True):
 
         for i in unrs[1:]:
             m.remove_output(unit=abs(i))
-    #
+
     if 'OC' in m._mf.get_package_list():
         m._mf.remove_package('OC')
         for i in unrs[1:]:
@@ -340,6 +371,7 @@ def prepare_model_compare_h_cbc(m, save_hds=True, save_cbc=True):
 
         oc.reset_budgetunit(budgetunit=unrs[3])
 
+    # Check if unitnumber are used twice
     pointers_in_model = pointers_in_model_fun(m)
     unitnumers_in_model = [i[1] for i in pointers_in_model]
 
@@ -355,6 +387,7 @@ def prepare_model_compare_h_cbc(m, save_hds=True, save_cbc=True):
 def pointers_in_model_fun(m):
     def add_outp_ext(m):
         l = []
+
         if m is not None:
             # write the external files
             for b, u, f in zip(

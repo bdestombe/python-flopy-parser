@@ -213,18 +213,27 @@ class Model(object):
         unique_modules = set(
             [item['parent_str'] for name, item in loaded_packages.items()])
 
+        if 'flopy.seawat' in unique_modules:
+            main_model = 'flopy.seawat'
+
+        elif 'flopy.mt3d' in unique_modules:
+            main_model = 'flopy.mt3d'
+
+        else:
+            main_model = 'flopy.modflow'
+
+        pm = od()
+        pm['name'] = main_model
+
+        pm['class'] = self.possible_sw_packages[main_model]
+        pm['parent_str'] = 'flopy'
+        pm['loaded'] = False
+        pm['instance'] = pm['class']()
+
+        self.packages[main_model] = pm
+        self.parameters[main_model] = load_package(pm['instance'])
+
         for mod in [item for item in all_modules if item in unique_modules]:
-            pm = od()
-            pm['name'] = mod
-
-            pm['class'] = self.possible_sw_packages[mod]
-            pm['parent_str'] = 'flopy'
-            pm['loaded'] = False
-            pm['instance'] = pm['class']()
-
-            self.packages[mod] = pm
-            self.parameters[mod] = load_package(pm['instance'])
-
             for name, item in loaded_packages.items():
                 assert name in loaded_parameters, 'Each loaded package should have a loaded self.parameters'
 
@@ -235,11 +244,27 @@ class Model(object):
                 self.parameters[name] = loaded_parameters[name]
 
         # sanitize
+        self.script_sanitize_parentmodel(main_model)
         self.script_sanitize_ncomp()
         self.script_sanitize_BTN_mfenheriting()
         self.script_sanitize_unwanted_parameters()
         self.script_sanitize_return_all_data()
         self.script_sanitize_ensure_2d()
+
+    def script_sanitize_parentmodel(self, main_model):
+        parent = main_model.split('.')[1]
+
+        for p in self.parameters.keys():
+            if 'model' in self.parameters[p]:
+                self.parameters[p]['model'].value = parent
+
+            if 'modflowmodel' in self.parameters[p]:
+                # in flopy.mt3d and flopy.seawat
+                del self.parameters[p]['modflowmodel']
+
+            if 'mt3dmodel' in self.parameters[p]:
+                # in flopy.seawat
+                del self.parameters[p]['mt3dmodel']
 
     def script_sanitize_modelname(self, name):
         for pack_key, pack_val in self.parameters.items():
@@ -368,10 +393,6 @@ class Model(object):
         out = [self.import_statements()]
 
         for name in self.packages:
-            if 'model' in self.parameters[name]:
-                self.parameters[name]['model'].value = self.packages[name][
-                    'parent_str'].split('.')[-1].lower()
-
             out.append(
                 self.script_package2string(
                     name,
@@ -399,10 +420,6 @@ class Model(object):
         ]
 
         for name, item in self.packages.items():
-            if 'model' in self.parameters[name]:
-                self.parameters[name]['model'].value = self.packages[name][
-                    'parent_str'].split('.')[-1].lower()
-
             out.append(nbf.v4.new_markdown_cell('## {0}'.format(name)))
             out.append(
                 nbf.v4.new_code_cell(
@@ -485,8 +502,8 @@ class Model(object):
 
         ncomp = self.parameters['BTN']['ncomp'].value
 
-        if ncomp == 1:
-            return
+        # if ncomp == 1:
+        #     return
 
         ncomp_adjusts = [['DSP', 'dmcoef'], ['BTN', 'sconc'], ['RCT', 'sp1'],
                          ['RCT', 'sp2'], ['RCT', 'rc1'], ['RCT', 'rc2'],

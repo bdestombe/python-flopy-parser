@@ -391,13 +391,13 @@ class Parameter(object):
             width) + '}'
         prelude = key + ' = '
 
-        if key == 'modflowmodel':
-            s = 'modflow'
+        # if key == 'modflowmodel':
+        #     s = "None"  # 'modflow'
+        #
+        # elif key == 'mt3dmodel':
+        #     s = "None"  # 'mt3d'
 
-        elif key == 'mt3dmodel':
-            s = 'mt3d'
-
-        elif key == 'model':
+        if key == 'model':
             s = self.string[1:-1]
 
         elif key == 'dtype' and self.string[:15] == '(numpy.record, ':
