@@ -40,7 +40,7 @@ def get_exe_path(exe_name='mf2005'):
     return fp
 
 
-def fun_test_reference_run(modelname, test_model_inputref_dir, mf5_exe):
+def fun_test_reference_run(modelname, test_model_inputref_dir, mf5_exe, test_hds=True, test_cbc=True):
     assert os.path.exists(test_model_inputref_dir), "test_example_dir does not exist"
     # assert os.path.exists(os.path.join(test_example_dir, modelname)), "test_example_dir/modelname does not exist"
 
@@ -52,8 +52,8 @@ def fun_test_reference_run(modelname, test_model_inputref_dir, mf5_exe):
             tempfile.TemporaryDirectory() as test_model_outputmetascript_dir:
 
         # copy reference inputfiles to working dir.
-        input_filelist = glob.glob(os.path.join(test_model_inputref_dir, modelname + '*'))
-        assert input_filelist, 'Reference run folder: test_example_dir/modelname is empty'
+        input_filelist = glob.glob(os.path.join(test_model_inputref_dir, '*'))
+        assert input_filelist, 'test_model_inputref_dir is empty:' + test_model_inputref_dir
 
         for fp in input_filelist:
             copy2(fp, test_model_inputdirect_dir)
@@ -69,12 +69,15 @@ def fun_test_reference_run(modelname, test_model_inputref_dir, mf5_exe):
         # Change Output-Control params to generate heads and flows to compare.
         # Modify only the files that require chages. Therefore copy all input files from reference folder and overwrite
         # what is needed.
-        pcks_modified = prepare_model_compare_h_cbc(m)
+        pcks_modified = prepare_model_compare_h_cbc(m, save_hds=test_hds, save_cbc=test_cbc)
 
         for pck in pcks_modified:
             pck.write_file()
 
         m.write_name_file()
+        fp_nam_direct = os.path.join(m.model_ws, m.namefile)
+        with open(fp_nam_direct) as fh:
+            print(''.join(fh.readlines()))
 
         # Create reference output
         suc, mes = test_inputfiles(modelname, test_model_inputdirect_dir, test_model_outputdirect_dir, mf5_exe)
@@ -90,22 +93,33 @@ def fun_test_reference_run(modelname, test_model_inputref_dir, mf5_exe):
 
         # Run the generated script that writes the inputfiles
         exec(s)
+        # assert len(model.package_units) == len(set(model.package_units)), 'Unit number is used multiple times'
 
         # Runs the generated input files. And move the output files to the output folder
         suc, mes = test_inputfiles(modelname, test_model_inputmetascript_dir, test_model_outputmetascript_dir, mf5_exe)
 
         assert suc, mes
 
+        if False:
+            ls_fp = os.path.join(test_model_outputdirect_dir, m.lst.file_name[0])#  modelname + '.' + m._mf.lst.extension[0])
+            ls_fp_ref = os.path.join(test_model_outputmetascript_dir, model.lst.file_name[0])#modelname + '.' + m._mf.lst.extension[0])
+
+            glob.glob(test_model_outputmetascript_dir + '/*')
+
+            test_listfile(ls_fp, ls_fp_ref)
+
         # Compare outputfiles cbc and heads
-        hd_fp_ref = os.path.join(test_model_outputdirect_dir, modelname + '.hds')
-        hd_fp = os.path.join(test_model_outputmetascript_dir, modelname + '.hds')
+        if test_hds:
+            hd_fp_ref = os.path.join(test_model_outputdirect_dir, modelname + '.hds')
+            hd_fp = os.path.join(test_model_outputmetascript_dir, modelname + '.hds')
 
-        assert test_headfile(hd_fp, hd_fp_ref), 'Heads do not match'
+            assert test_headfile(hd_fp, hd_fp_ref), 'Heads do not match'
 
-        cbc_fp_ref = os.path.join(test_model_outputdirect_dir, modelname + '.cbc')
-        cbc_fp = os.path.join(test_model_outputmetascript_dir, modelname + '.cbc')
+        if test_cbc:
+            cbc_fp_ref = os.path.join(test_model_outputdirect_dir, modelname + '.cbc')
+            cbc_fp = os.path.join(test_model_outputmetascript_dir, modelname + '.cbc')
 
-        assert test_cbcfile(cbc_fp, cbc_fp_ref), 'Flows do not match'
+            assert test_cbcfile(cbc_fp, cbc_fp_ref), 'Flows do not match'
 
     pass
 
@@ -114,12 +128,16 @@ def test_inputfiles(modelname, test_model_inputdirect_dir, test_model_outputdire
     """Runs the generated input files. And move the output files to the output folder."""
     input_filelist = glob.glob(os.path.join(test_model_inputdirect_dir, '*'))
 
-    try:
-        success, message = run_model(exe_name=mf5_exe, namefile=modelname + '.nam', model_ws=test_model_inputdirect_dir,
-                                     silent=True)
-    except:
-        success = False
-        message = 'Failed during run with the generated input files'
+    success, message = run_model(exe_name=mf5_exe, namefile=modelname + '.nam', model_ws=test_model_inputdirect_dir,
+                                 silent=True)
+    if not success:
+        try:
+            with open(os.path.join(test_model_inputdirect_dir, modelname + '.lst')) as fh:
+                print(''.join(fh.readlines()))
+        except:
+            print('NO LISTFILE')
+
+        assert success, message
 
     output_filelist = [f for f in glob.glob(os.path.join(test_model_inputdirect_dir, '*')) if f not in input_filelist]
     for file in output_filelist:
@@ -151,7 +169,30 @@ def test_diff_list(modelname, test_model_outputref_dir, test_model_inputdirect_d
     return {'suc': success, 'mes': message, 'dif': diff}
 
 
+def test_listfile(ls_fp, ls_fp_ref):
+    assert os.path.exists(ls_fp), 'ls_fp does not exist'
+    assert os.path.exists(ls_fp_ref), 'ls_fp_ref does not exist'
+    try:
+        # Some reference list files are not readable
+        with open(ls_fp_ref) as f_ref:
+            file_ref = f_ref.readlines()
+
+        with open(ls_fp) as f_direct:
+            file_direct = f_direct.readlines()
+
+        diff = list(
+            unified_diff(file_ref, file_direct, 'reference listfile', 'direct namefile', n=0))
+
+    except:
+        diff = ['Failed to compare']
+
+    return diff
+
+
 def test_headfile(hd_fp, hd_fp_ref):
+    assert os.path.exists(hd_fp_ref)
+    assert os.path.exists(hd_fp)
+
     hobj = flopy.utils.HeadFile(hd_fp, precision='auto')
     hobj_ref = flopy.utils.HeadFile(hd_fp_ref, precision='auto')
 
@@ -256,18 +297,97 @@ def run_and_compare_h_cbc(m, test_model_inputdirect_dir, test_model_outputdirect
         return m, {'suc': True, 'mes': 'Flows and heads match', 'dif': ''}
 
 
-def prepare_model_compare_h_cbc(m):
+def prepare_model_compare_h_cbc(m, save_hds=True, save_cbc=True):
     # files that need to be adjusted of the reference model as head and cbc are not outputted by default
-    fhs = []
+    from flopy.modflow import ModflowOc
 
-    flopy.modflow.mfoc.ModflowOc(model=m, stress_period_data={(0, 0): ['save head', 'save budget']},
-                                 unitnumber=[50, 51, 52, 53, 0])
-    fhs.append(m.get_package('oc'))
+    spd = []
+    if save_hds:
+        spd.append('save head')
 
-    for p in m.get_package_list():
-        if hasattr(m.get_package(p), 'ipakcb'):
-            m.get_package(p).ipakcb = 53
-            m.add_output_file(53, fname=None, package=p)
-            fhs.append(m.get_package(p))
+    if save_cbc:
+        spd.append('save budget')
+
+    unrs = [14, 51, 52, 53, 0]
+
+    if 'OC' in m.get_package_list():
+        unrs[0] = m.oc.unit_number[0] if m.oc.unit_number else unrs[0]
+        unrs[1] = m.oc.iuhead if m.oc.iuhead else unrs[1]
+        unrs[2] = m.oc.iuddn if m.oc.iuddn else unrs[2]
+        unrs[3] = m.oc.iubud if m.oc.iubud else unrs[3]
+        unrs[4] = m.oc.iuibnd if m.oc.iuibnd else unrs[4]
+
+        m.remove_package('OC')
+
+        for i in unrs[1:]:
+            m.remove_output(unit=abs(i))
+    #
+    if 'OC' in m._mf.get_package_list():
+        m._mf.remove_package('OC')
+        for i in unrs[1:]:
+            m._mf.remove_output(unit=abs(i))
+
+    oc = flopy.modflow.mfoc.ModflowOc(model=m, stress_period_data={(0, 0): spd}, unitnumber=unrs)
+
+    fhs = [oc]
+
+    if save_cbc:
+        for p in m.get_package_list():
+            if hasattr(m.get_package(p), 'ipakcb'):
+                if m.get_package(p)['ipakcb'] != unrs[3]:
+                    print(m.get_package(p)['ipakcb'], 'ipakcb ori is', unrs)
+                    fhs.append(m.get_package(p))
+
+        oc.reset_budgetunit(budgetunit=unrs[3])
+
+    pointers_in_model = pointers_in_model_fun(m)
+    unitnumers_in_model = [i[1] for i in pointers_in_model]
+
+    if len(unitnumers_in_model) != len(set(unitnumers_in_model)):
+        next_unit = int(max(unitnumers_in_model)) + 1
+        m._mf.set_model_units(iunit0=next_unit)
+
+    assert len(unitnumers_in_model) == len(set(unitnumers_in_model)), 'Unit number is used multiple times'
 
     return fhs
+
+
+def pointers_in_model_fun(m):
+    def add_outp_ext(m):
+        l = []
+        if m is not None:
+            # write the external files
+            for b, u, f in zip(
+                    m.external_binflag,
+                    m.external_units,
+                    m.external_fnames):
+                if b:
+                    l.append((f, u))
+            for u, f, b in zip(
+                    m.output_units,
+                    m.output_fnames,
+                    m.output_binflag,
+            ):
+                if u == 0:
+                    continue
+                else:
+                    l.append((f, u))
+        return l
+
+    pointers_in_model = []
+    # Write global file entry
+    if m.glo is not None:
+        if m.glo.unit_number[0] > 0:
+            pointers_in_model.append(('glo', m.glo.unit_number[0]))
+    pointers_in_model.append((m.lst.name[0], m.lst.unit_number[0]))
+
+    pointers_in_model.extend(add_outp_ext(m))
+    pointers_in_model.extend(add_outp_ext(m._mf))
+    pointers_in_model.extend(add_outp_ext(m._mt))
+
+    for p in m.packagelist:
+        for i in range(len(p.name)):
+            if p.unit_number[i] == 0:
+                continue
+            pointers_in_model.append((p.name[i], p.unit_number[i]))
+    return pointers_in_model
