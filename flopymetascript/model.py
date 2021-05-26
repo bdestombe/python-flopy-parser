@@ -509,9 +509,7 @@ class Model(object):
                          ['RCT', 'sp2'], ['RCT', 'rc1'], ['RCT', 'rc2'],
                          ['RCT', 'srconc']]
 
-        for adjust_item in ncomp_adjusts:
-            name, par_name = adjust_item[0], adjust_item[1]
-
+        for name, par_name in ncomp_adjusts:
             if name in self.parameters:
                 dmcoef_old = copy.copy(self.parameters[name][par_name])
 
@@ -521,6 +519,11 @@ class Model(object):
 
                     else:
                         key = par_name + str(icomp + 1)
+
+                    if par_name == 'dmcoef' and dmcoef_item.value.ndim == 1 and dmcoef_item.value.size > 1:
+                        nlay = int(self.parameters['BTN']['nlay'].value)
+                        shape = (nlay, 1)
+                        dmcoef_item.value = dmcoef_item.value[:, None]
 
                     self.parameters[name][key] = Parameter(dmcoef_item)
                     self.parameters[name][
@@ -607,14 +610,5 @@ class Model(object):
             for param in params:
                 if pck in self.parameters:
                     self.parameters[pck][param].return_all_data = True
-
-        pass
-
-    def script_sanitize_ensure_2d(self):
-        if 'EVT' in self.parameters and self.parameters['EVT']['surf'].value.ndim == 4:
-            self.parameters['EVT']['surf'].value = self.parameters['EVT']['surf'].value[0, 0]
-
-        if 'LAK' in self.parameters and self.parameters['LAK']['lakarr'].value.ndim == 4:
-            self.parameters['LAK']['lakarr'].value = self.parameters['LAK']['lakarr'].value[0]
 
         pass

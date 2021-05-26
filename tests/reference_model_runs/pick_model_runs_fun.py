@@ -215,7 +215,8 @@ def test_headfile(hd_fp, hd_fp_ref):
     h = hobj.get_alldata()
     h_ref = hobj_ref.get_alldata()
 
-    npt.assert_almost_equal(h, h_ref, decimal=6)
+    # SEAWAT test file solvers aren't set so strict on the residuals
+    npt.assert_almost_equal(h, h_ref, decimal=4)
     suc = True
 
     return suc
@@ -230,7 +231,8 @@ def test_ucnfile(ucn_fp, ucn_fp_ref, model=None):
     if not suc:
         ucn1 = flopy.utils.UcnFile(ucn_fp, model=model)
         ucn2 = flopy.utils.UcnFile(ucn_fp_ref, model=model)
-        npt.assert_almost_equal(ucn1.get_alldata(), ucn2.get_alldata(), decimal=5)
+        # SEAWAT test file solvers aren't set so strict on the residuals
+        npt.assert_almost_equal(ucn1.get_alldata(), ucn2.get_alldata(), decimal=4)
         suc = True
 
     return suc
