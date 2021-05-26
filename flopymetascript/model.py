@@ -249,7 +249,7 @@ class Model(object):
         self.script_sanitize_BTN_mfenheriting()
         self.script_sanitize_unwanted_parameters()
         self.script_sanitize_return_all_data()
-        self.script_sanitize_ensure_2d()
+        # self.script_sanitize_ensure_2d()
 
     def script_sanitize_parentmodel(self, main_model):
         parent = main_model.split('.')[1]

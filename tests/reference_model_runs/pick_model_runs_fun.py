@@ -128,6 +128,8 @@ def fun_test_reference_run(modelname, test_model_inputref_dir, mf5_exe, test_hds
             assert test_cbcfile(cbc_fp, cbc_fp_ref), 'Flows do not match'
 
         if test_ucn:
+            assert 'BTN' in mp.parameters, 'No BTN package configured therefore no UCN binary to compare. ' \
+                                           'test_unc=False?'
             for i in range(mp.parameters['BTN']['ncomp'].value):
                 icomp = i + 1
                 ucn_fp_ref = os.path.join(test_model_outputdirect_dir, 'MT3D{0:03d}.UCN'.format(icomp))
@@ -213,11 +215,8 @@ def test_headfile(hd_fp, hd_fp_ref):
     h = hobj.get_alldata()
     h_ref = hobj_ref.get_alldata()
 
-    try:
-        npt.assert_almost_equal(h, h_ref)
-        suc = True
-    except:
-        suc = False
+    npt.assert_almost_equal(h, h_ref, decimal=6)
+    suc = True
 
     return suc
 
@@ -231,7 +230,8 @@ def test_ucnfile(ucn_fp, ucn_fp_ref, model=None):
     if not suc:
         ucn1 = flopy.utils.UcnFile(ucn_fp, model=model)
         ucn2 = flopy.utils.UcnFile(ucn_fp_ref, model=model)
-        suc = np.all(np.isclose(ucn1.get_alldata(), ucn2.get_alldata()))
+        npt.assert_almost_equal(ucn1.get_alldata(), ucn2.get_alldata(), decimal=5)
+        suc = True
 
     return suc
 
@@ -246,6 +246,16 @@ def test_cbcfile(cbc_fp, cbc_fp_ref):
         cbc1 = flopy.utils.CellBudgetFile(cbc_fp)
         cbc2 = flopy.utils.CellBudgetFile(cbc_fp_ref)
         suc = cbc1.recorddict == cbc2.recorddict
+
+        rec_names = cbc2.get_unique_record_names()
+
+        for name in rec_names:
+            q1 = cbc1.get_data(text=name, full3D=True)
+            q2 = cbc2.get_data(text=name, full3D=True)
+            for q1i, q2i in zip(q1, q2):
+                npt.assert_almost_equal(q1i, q2i, decimal=4)
+
+        suc = True
 
     return suc
 

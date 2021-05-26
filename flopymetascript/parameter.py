@@ -68,6 +68,18 @@ class Parameter(object):
         if isinstance(var, str):
             value = var
 
+        elif isinstance(var, flopy.utils.util_array.Util2d):
+            value = var.array
+
+        elif isinstance(var, flopy.utils.util_array.Util3d):
+            value = var.array
+
+        elif isinstance(var, flopy.utils.util_array.Transient2d):
+            value = {k: Parameter(v) for k, v in var.transient_2ds.items()}
+
+        elif isinstance(var, flopy.utils.util_array.Transient3d):
+            value = {k: Parameter(v) for k, v in var.transient_3ds.items()}
+
         elif isinstance(var, flopy.seawat.swt.Seawat):
             value = var
 
@@ -390,12 +402,6 @@ class Parameter(object):
         style = '{based_on_style: google, indent_width: 4, split_before_named_assigns: False, column_limit: ' + str(
             width) + '}'
         prelude = key + ' = '
-
-        # if key == 'modflowmodel':
-        #     s = "None"  # 'modflow'
-        #
-        # elif key == 'mt3dmodel':
-        #     s = "None"  # 'mt3d'
 
         if key == 'model':
             s = self.string[1:-1]
