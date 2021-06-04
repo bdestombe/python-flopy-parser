@@ -1,0 +1,27 @@
+#
+# MT3D-USGS ver 1.0 Name file for 1-D test case NonLin transport in Unsat Simulation
+#
+# Standard output file
+LIST                16        NonLin.m3d
+# Transport package input files
+BTN                  1        NonLin.btn
+ADV                  2        NonLin.adv
+DSP                  3        NonLin.dsp
+SSM                  4        NonLin.ssm
+GCG                  5        NonLin.gcg
+RCT                  8        NonLin.rct
+UZT2                 7        NonLin.uzt
+# Flow-Transport Link input file
+FTL                 10        NonLin.ftl 'FREE'
+# UZF File containing RCH and ET options
+
+# Uncomment the following lines to override
+# the default names of optional MT3D-USGS output files
+# mt3d001.ucn, mt3d001s.ucn, mt3d001.obs, mt3d001.mas, mt3d.cnf.
+# The unit numbers for these files are preset in the
+# MT3D-USGS code.
+# data(binary)     201        NonLin.ucn
+# data(binary)     301        NonLins.ucn
+data               401        NonLin.obs
+#data              601        NonLin.mas
+#data               17        NonLin.cnf

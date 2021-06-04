@@ -1,0 +1,742 @@
+                                   MODFLOW 6
+                U.S. GEOLOGICAL SURVEY MODULAR HYDROLOGIC MODEL
+                            VERSION 6.0.3 08/09/2018
+
+   MODFLOW 6 compiled Dec 14 2018 17:05:31 with IFORT compiler (ver. 18.0.3)
+
+This software has been approved for release by the U.S. Geological 
+Survey (USGS). Although the software has been subjected to rigorous 
+review, the USGS reserves the right to update the software as needed 
+pursuant to further analysis and review. No warranty, expressed or 
+implied, is made by the USGS or the U.S. Government as to the 
+functionality of the software and related material nor shall the 
+fact of release constitute any such warranty. Furthermore, the 
+software is released on condition that neither the USGS nor the U.S. 
+Government shall be held liable for any damages resulting from its 
+authorized or unauthorized use. Also refer to the USGS Water 
+Resources Software User Rights Notice for complete use, copyright, 
+and distribution information.
+
+
+System command used to initiate simulation:
+c:\bin\mf6.exe
+
+MODFLOW was compiled using uniform precision.
+Real Variables
+  PRECISION: 15
+  KIND: 8
+  TINY (smallest non-zero value):    2.225074-308
+  HUGE (largest value):    1.797693+308
+Integer Variables
+  KIND: 4
+  HUGE (largest value): 2147483647
+  BIT_SIZE: 32
+ 
+
+ OPENED mfsim.nam
+ FILE TYPE:NAM   UNIT 1001   STATUS:OLD                 
+ FORMAT:FORMATTED              ACCESS:SEQUENTIAL          
+ ACTION:READ                
+
+
+ READING SIMULATION OPTIONS
+ END OF SIMULATION OPTIONS
+
+ READING SIMULATION TIMING
+
+ OPENED p01SpatialStresses.tdis
+ FILE TYPE:TDIS   UNIT 1002   STATUS:OLD                 
+ FORMAT:FORMATTED              ACCESS:SEQUENTIAL          
+ ACTION:READ                
+
+
+ TDIS -- TEMPORAL DISCRETIZATION PACKAGE,
+ VERSION 1 : 11/13/2014 - INPUT READ FROM UNIT 1002
+ PROCESSING TDIS OPTIONS
+    SIMULATION TIME UNIT IS DAYS
+ END OF TDIS OPTIONS
+ PROCESSING TDIS DIMENSIONS
+    3 STRESS PERIOD(S) IN SIMULATION
+ END OF TDIS DIMENSIONS
+ PROCESSING TDIS PERIODDATA
+
+
+ STRESS PERIOD     LENGTH       TIME STEPS     MULTIPLIER FOR DELT
+ ----------------------------------------------------------------------------
+        1         200.0000         10                    1.000
+        2         200.0000         10                    1.000
+        3         200.0000         10                    1.000
+ END OF TDIS PERIODDATA
+ END OF SIMULATION TIMING
+
+ READING SIMULATION MODELS
+    GWF6 model GWF_P01 will be created as model 1
+ END OF SIMULATION MODELS
+
+ READING SIMULATION EXCHANGES
+ END OF SIMULATION EXCHANGES
+
+ READING SOLUTIONGROUP
+
+ Creating solution: SLN_1           
+
+ OPENED p01SpatialStresses.ims
+ FILE TYPE:IMS   UNIT 1014   STATUS:OLD                 
+ FORMAT:FORMATTED              ACCESS:SEQUENTIAL          
+ ACTION:READ                
+
+ END OF SIMULATION SOLUTIONGROUP
+
+ IMS -- ITERATIVE MODEL SOLUTION PACKAGE, VERSION 6, 4/28/2017
+         INPUT READ FROM UNIT 1014
+
+ PROCESSING IMS OPTIONS
+ END OF IMS OPTIONS
+
+ PROCESSING IMS NONLINEAR
+ END OF IMS NONLINEAR DATA
+ OUTER ITERATION CONVERGENCE CRITERION     (HCLOSE) =    0.100000E-09
+ MAXIMUM NUMBER OF OUTER ITERATIONS        (MXITER) =       100
+ SOLVER PRINTOUT INDEX                     (IPRIMS) =         1
+ NONLINEAR ITERATION METHOD            (NONLINMETH) =         0
+ LINEAR SOLUTION METHOD                   (LINMETH) =         1
+ ***UNDER-RELAXATION WILL NOT BE USED***
+ 
+ ***IMS LINEAR SOLVER WILL BE USED***
+
+ IMSLINEAR -- UNSTRUCTURED LINEAR SOLUTION PACKAGE, VERSION 8, 04/28/2017
+
+ PROCESSING LINEAR DATA
+ END OF LINEAR DATA
+
+       SOLUTION BY THE        CONJUGATE-GRADIENT       METHOD
+ ------------------------------------------------------------------
+ MAXIMUM OF    100 CALLS OF SOLUTION ROUTINE
+ MAXIMUM OF    300 INTERNAL ITERATIONS PER CALL TO SOLUTION ROUTINE
+ LINEAR ACCELERATION METHOD            = CG        
+ MATRIX PRECONDITIONING TYPE           = MOD. INCOMPLETE LU  
+ MATRIX SCALING APPROACH               = NO SCALING          
+ MATRIX REORDERING APPROACH            = ORIGINAL ORDERING        
+ NUMBER OF ORTHOGONALIZATIONS          =        0
+ HEAD CHANGE CRITERION FOR CLOSURE     =    0.10000E-09
+ RESIDUAL CHANGE CRITERION FOR CLOSURE =    0.10000E-09
+ RESIDUAL CONVERGENCE OPTION           =        0
+ RESIDUAL CONVERGENCE NORM             = INFINITY NORM   
+ RELAXATION FACTOR                     =    0.10000E+01
+
+
+
+ 
+1
+                            STRESS PERIOD NO.    1, LENGTH =   200.0000    
+                            -----------------------------------------------
+
+                              NUMBER OF TIME STEPS =    10
+
+                               MULTIPLIER FOR DELT =     1.000
+
+                            INITIAL TIME STEP SIZE =   20.00000    
+
+
+ OUTER ITERATION SUMMARY
+ ---------------------------------------------------------------------------------------
+                       OUTER     INNER         MAXIMUM                    MAXIMUM CHANGE
+                   ITERATION ITERATION          CHANGE                    MODEL-(CELLID)
+ ---------------------------------------------------------------------------------------
+ Linear Solver             1       300    -8.90457                       1_GWF-(6,1,100)
+ Under-relaxation          1              -8.90457                       1_GWF-(6,1,100)
+ Linear Solver             2       300    0.172999                        1_GWF-(1,1,51)
+ Under-relaxation          2              0.172999                        1_GWF-(1,1,51)
+ Linear Solver             3       300    2.323025E-03                    1_GWF-(1,1,81)
+ Under-relaxation          3              2.323025E-03                    1_GWF-(1,1,81)
+ Linear Solver             4       300   -1.106366E-04                    1_GWF-(1,1,53)
+ Under-relaxation          4             -1.106366E-04                    1_GWF-(1,1,53)
+ Linear Solver             5       300   -1.510261E-06                    1_GWF-(1,1,79)
+ Under-relaxation          5             -1.510261E-06                    1_GWF-(1,1,79)
+ Linear Solver             6        86    7.822881E-08                    1_GWF-(1,1,54)
+ Under-relaxation          6              7.822881E-08                    1_GWF-(1,1,54)
+ Linear Solver             7        60    9.938788E-10                    1_GWF-(1,1,79)
+ Under-relaxation          7              9.938788E-10                    1_GWF-(1,1,79)
+ Linear Solver             8         1   -2.557954E-13                    1_GWF-(1,1,50)
+
+ 8 CALLS TO NUMERICAL SOLUTION IN TIME STEP 1 STRESS PERIOD 1
+ 1647 TOTAL ITERATIONS
+
+
+ OUTER ITERATION SUMMARY
+ ---------------------------------------------------------------------------------------
+                       OUTER     INNER         MAXIMUM                    MAXIMUM CHANGE
+                   ITERATION ITERATION          CHANGE                    MODEL-(CELLID)
+ ---------------------------------------------------------------------------------------
+ Linear Solver             1         1   -2.557954E-13                    1_GWF-(1,1,49)
+
+ 1 CALLS TO NUMERICAL SOLUTION IN TIME STEP 2 STRESS PERIOD 1
+ 1 TOTAL ITERATIONS
+
+
+ OUTER ITERATION SUMMARY
+ ---------------------------------------------------------------------------------------
+                       OUTER     INNER         MAXIMUM                    MAXIMUM CHANGE
+                   ITERATION ITERATION          CHANGE                    MODEL-(CELLID)
+ ---------------------------------------------------------------------------------------
+ Linear Solver             1         1   -2.629008E-13                    1_GWF-(1,1,49)
+
+ 1 CALLS TO NUMERICAL SOLUTION IN TIME STEP 3 STRESS PERIOD 1
+ 1 TOTAL ITERATIONS
+
+
+ OUTER ITERATION SUMMARY
+ ---------------------------------------------------------------------------------------
+                       OUTER     INNER         MAXIMUM                    MAXIMUM CHANGE
+                   ITERATION ITERATION          CHANGE                    MODEL-(CELLID)
+ ---------------------------------------------------------------------------------------
+ Linear Solver             1         1   -2.415845E-13                    1_GWF-(1,1,51)
+
+ 1 CALLS TO NUMERICAL SOLUTION IN TIME STEP 4 STRESS PERIOD 1
+ 1 TOTAL ITERATIONS
+
+
+ OUTER ITERATION SUMMARY
+ ---------------------------------------------------------------------------------------
+                       OUTER     INNER         MAXIMUM                    MAXIMUM CHANGE
+                   ITERATION ITERATION          CHANGE                    MODEL-(CELLID)
+ ---------------------------------------------------------------------------------------
+ Linear Solver             1         1   -2.344791E-13                    1_GWF-(1,1,51)
+
+ 1 CALLS TO NUMERICAL SOLUTION IN TIME STEP 5 STRESS PERIOD 1
+ 1 TOTAL ITERATIONS
+
+
+ OUTER ITERATION SUMMARY
+ ---------------------------------------------------------------------------------------
+                       OUTER     INNER         MAXIMUM                    MAXIMUM CHANGE
+                   ITERATION ITERATION          CHANGE                    MODEL-(CELLID)
+ ---------------------------------------------------------------------------------------
+ Linear Solver             1         1   -2.415845E-13                    1_GWF-(1,1,49)
+
+ 1 CALLS TO NUMERICAL SOLUTION IN TIME STEP 6 STRESS PERIOD 1
+ 1 TOTAL ITERATIONS
+
+
+ OUTER ITERATION SUMMARY
+ ---------------------------------------------------------------------------------------
+                       OUTER     INNER         MAXIMUM                    MAXIMUM CHANGE
+                   ITERATION ITERATION          CHANGE                    MODEL-(CELLID)
+ ---------------------------------------------------------------------------------------
+ Linear Solver             1         1   -2.344791E-13                    1_GWF-(1,1,51)
+
+ 1 CALLS TO NUMERICAL SOLUTION IN TIME STEP 7 STRESS PERIOD 1
+ 1 TOTAL ITERATIONS
+
+
+ OUTER ITERATION SUMMARY
+ ---------------------------------------------------------------------------------------
+                       OUTER     INNER         MAXIMUM                    MAXIMUM CHANGE
+                   ITERATION ITERATION          CHANGE                    MODEL-(CELLID)
+ ---------------------------------------------------------------------------------------
+ Linear Solver             1         1   -2.273737E-13                    1_GWF-(1,1,50)
+
+ 1 CALLS TO NUMERICAL SOLUTION IN TIME STEP 8 STRESS PERIOD 1
+ 1 TOTAL ITERATIONS
+
+
+ OUTER ITERATION SUMMARY
+ ---------------------------------------------------------------------------------------
+                       OUTER     INNER         MAXIMUM                    MAXIMUM CHANGE
+                   ITERATION ITERATION          CHANGE                    MODEL-(CELLID)
+ ---------------------------------------------------------------------------------------
+ Linear Solver             1         1   -2.273737E-13                    1_GWF-(1,1,50)
+
+ 1 CALLS TO NUMERICAL SOLUTION IN TIME STEP 9 STRESS PERIOD 1
+ 1 TOTAL ITERATIONS
+
+
+ OUTER ITERATION SUMMARY
+ ---------------------------------------------------------------------------------------
+                       OUTER     INNER         MAXIMUM                    MAXIMUM CHANGE
+                   ITERATION ITERATION          CHANGE                    MODEL-(CELLID)
+ ---------------------------------------------------------------------------------------
+ Linear Solver             1         1   -2.344791E-13                    1_GWF-(1,1,47)
+
+ 1 CALLS TO NUMERICAL SOLUTION IN TIME STEP 10 STRESS PERIOD 1
+ 1 TOTAL ITERATIONS
+1
+                            STRESS PERIOD NO.    2, LENGTH =   200.0000    
+                            -----------------------------------------------
+
+                              NUMBER OF TIME STEPS =    10
+
+                               MULTIPLIER FOR DELT =     1.000
+
+                            INITIAL TIME STEP SIZE =   20.00000    
+
+
+ OUTER ITERATION SUMMARY
+ ---------------------------------------------------------------------------------------
+                       OUTER     INNER         MAXIMUM                    MAXIMUM CHANGE
+                   ITERATION ITERATION          CHANGE                    MODEL-(CELLID)
+ ---------------------------------------------------------------------------------------
+ Linear Solver             1       300    -2.52128                        1_GWF-(5,1,50)
+ Under-relaxation          1              -2.52128                        1_GWF-(5,1,50)
+ Linear Solver             2       300   -2.939985E-02                    1_GWF-(1,1,51)
+ Under-relaxation          2             -2.939985E-02                    1_GWF-(1,1,51)
+ Linear Solver             3       300    6.551231E-04                    1_GWF-(1,1,44)
+ Under-relaxation          3              6.551231E-04                    1_GWF-(1,1,44)
+ Linear Solver             4       277    1.194938E-05                    1_GWF-(1,1,49)
+ Under-relaxation          4              1.194938E-05                    1_GWF-(1,1,49)
+ Linear Solver             5       221   -2.891768E-07                    1_GWF-(1,1,43)
+ Under-relaxation          5             -2.891768E-07                    1_GWF-(1,1,43)
+ Linear Solver             6        76   -5.227477E-09                    1_GWF-(1,1,48)
+ Under-relaxation          6             -5.227477E-09                    1_GWF-(1,1,48)
+ Linear Solver             7        94    9.862333E-11                    1_GWF-(1,1,38)
+
+ 7 CALLS TO NUMERICAL SOLUTION IN TIME STEP 1 STRESS PERIOD 2
+ 1568 TOTAL ITERATIONS
+
+
+ OUTER ITERATION SUMMARY
+ ---------------------------------------------------------------------------------------
+                       OUTER     INNER         MAXIMUM                    MAXIMUM CHANGE
+                   ITERATION ITERATION          CHANGE                    MODEL-(CELLID)
+ ---------------------------------------------------------------------------------------
+ Linear Solver             1       300   -0.872021                        1_GWF-(1,1,51)
+ Under-relaxation          1             -0.872021                        1_GWF-(1,1,51)
+ Linear Solver             2       300   -1.955303E-02                    1_GWF-(1,1,50)
+ Under-relaxation          2             -1.955303E-02                    1_GWF-(1,1,50)
+ Linear Solver             3       300    3.669449E-04                    1_GWF-(1,1,40)
+ Under-relaxation          3              3.669449E-04                    1_GWF-(1,1,40)
+ Linear Solver             4       300    9.360549E-06                    1_GWF-(1,1,48)
+ Under-relaxation          4              9.360549E-06                    1_GWF-(1,1,48)
+ Linear Solver             5       240   -2.039460E-07                    1_GWF-(1,1,38)
+ Under-relaxation          5             -2.039460E-07                    1_GWF-(1,1,38)
+ Linear Solver             6        64   -5.054630E-09                    1_GWF-(1,1,47)
+ Under-relaxation          6             -5.054630E-09                    1_GWF-(1,1,47)
+ Linear Solver             7        66   -7.965895E-11                    1_GWF-(1,1,50)
+
+ 7 CALLS TO NUMERICAL SOLUTION IN TIME STEP 2 STRESS PERIOD 2
+ 1570 TOTAL ITERATIONS
+
+
+ OUTER ITERATION SUMMARY
+ ---------------------------------------------------------------------------------------
+                       OUTER     INNER         MAXIMUM                    MAXIMUM CHANGE
+                   ITERATION ITERATION          CHANGE                    MODEL-(CELLID)
+ ---------------------------------------------------------------------------------------
+ Linear Solver             1       300   -0.481841                        1_GWF-(1,1,52)
+ Under-relaxation          1             -0.481841                        1_GWF-(1,1,52)
+ Linear Solver             2       300   -1.249942E-02                    1_GWF-(1,1,50)
+ Under-relaxation          2             -1.249942E-02                    1_GWF-(1,1,50)
+ Linear Solver             3       300    2.247206E-04                    1_GWF-(1,1,38)
+ Under-relaxation          3              2.247206E-04                    1_GWF-(1,1,38)
+ Linear Solver             4       300    6.369116E-06                    1_GWF-(1,1,48)
+ Under-relaxation          4              6.369116E-06                    1_GWF-(1,1,48)
+ Linear Solver             5       224   -1.393849E-07                    1_GWF-(1,1,36)
+ Under-relaxation          5             -1.393849E-07                    1_GWF-(1,1,36)
+ Linear Solver             6        82   -3.780627E-09                    1_GWF-(1,1,47)
+ Under-relaxation          6             -3.780627E-09                    1_GWF-(1,1,47)
+ Linear Solver             7        73   -6.771472E-11                    1_GWF-(1,1,49)
+
+ 7 CALLS TO NUMERICAL SOLUTION IN TIME STEP 3 STRESS PERIOD 2
+ 1579 TOTAL ITERATIONS
+
+
+ OUTER ITERATION SUMMARY
+ ---------------------------------------------------------------------------------------
+                       OUTER     INNER         MAXIMUM                    MAXIMUM CHANGE
+                   ITERATION ITERATION          CHANGE                    MODEL-(CELLID)
+ ---------------------------------------------------------------------------------------
+ Linear Solver             1       300   -0.278999                        1_GWF-(1,1,52)
+ Under-relaxation          1             -0.278999                        1_GWF-(1,1,52)
+ Linear Solver             2       300   -7.734086E-03                    1_GWF-(1,1,50)
+ Under-relaxation          2             -7.734086E-03                    1_GWF-(1,1,50)
+ Linear Solver             3       300    1.370730E-04                    1_GWF-(1,1,37)
+ Under-relaxation          3              1.370730E-04                    1_GWF-(1,1,37)
+ Linear Solver             4       300    4.069732E-06                    1_GWF-(1,1,48)
+ Under-relaxation          4              4.069732E-06                    1_GWF-(1,1,48)
+ Linear Solver             5       209   -9.036948E-08                    1_GWF-(1,1,35)
+ Under-relaxation          5             -9.036948E-08                    1_GWF-(1,1,35)
+ Linear Solver             6        93   -2.551609E-09                    1_GWF-(1,1,46)
+ Under-relaxation          6             -2.551609E-09                    1_GWF-(1,1,46)
+ Linear Solver             7        68   -4.838085E-11                    1_GWF-(1,1,49)
+
+ 7 CALLS TO NUMERICAL SOLUTION IN TIME STEP 4 STRESS PERIOD 2
+ 1570 TOTAL ITERATIONS
+
+
+ OUTER ITERATION SUMMARY
+ ---------------------------------------------------------------------------------------
+                       OUTER     INNER         MAXIMUM                    MAXIMUM CHANGE
+                   ITERATION ITERATION          CHANGE                    MODEL-(CELLID)
+ ---------------------------------------------------------------------------------------
+ Linear Solver             1       300   -0.163280                        1_GWF-(1,1,53)
+ Under-relaxation          1             -0.163280                        1_GWF-(1,1,53)
+ Linear Solver             2       300   -4.688813E-03                    1_GWF-(1,1,50)
+ Under-relaxation          2             -4.688813E-03                    1_GWF-(1,1,50)
+ Linear Solver             3       300    8.269196E-05                    1_GWF-(1,1,37)
+ Under-relaxation          3              8.269196E-05                    1_GWF-(1,1,37)
+ Linear Solver             4       300    2.513632E-06                    1_GWF-(1,1,48)
+ Under-relaxation          4              2.513632E-06                    1_GWF-(1,1,48)
+ Linear Solver             5       178   -5.646503E-08                    1_GWF-(1,1,35)
+ Under-relaxation          5             -5.646503E-08                    1_GWF-(1,1,35)
+ Linear Solver             6       104   -1.618965E-09                    1_GWF-(1,1,46)
+ Under-relaxation          6             -1.618965E-09                    1_GWF-(1,1,46)
+ Linear Solver             7        64   -3.079492E-11                    1_GWF-(1,1,49)
+
+ 7 CALLS TO NUMERICAL SOLUTION IN TIME STEP 5 STRESS PERIOD 2
+ 1546 TOTAL ITERATIONS
+
+
+ OUTER ITERATION SUMMARY
+ ---------------------------------------------------------------------------------------
+                       OUTER     INNER         MAXIMUM                    MAXIMUM CHANGE
+                   ITERATION ITERATION          CHANGE                    MODEL-(CELLID)
+ ---------------------------------------------------------------------------------------
+ Linear Solver             1       300   -9.584485E-02                    1_GWF-(1,1,53)
+ Under-relaxation          1             -9.584485E-02                    1_GWF-(1,1,53)
+ Linear Solver             2       300   -2.807629E-03                    1_GWF-(1,1,50)
+ Under-relaxation          2             -2.807629E-03                    1_GWF-(1,1,50)
+ Linear Solver             3       300    4.939026E-05                    1_GWF-(1,1,37)
+ Under-relaxation          3              4.939026E-05                    1_GWF-(1,1,37)
+ Linear Solver             4       300    1.521677E-06                    1_GWF-(1,1,48)
+ Under-relaxation          4              1.521677E-06                    1_GWF-(1,1,48)
+ Linear Solver             5       132   -3.439241E-08                    1_GWF-(1,1,35)
+ Under-relaxation          5             -3.439241E-08                    1_GWF-(1,1,35)
+ Linear Solver             6       115   -9.856578E-10                    1_GWF-(1,1,46)
+ Under-relaxation          6             -9.856578E-10                    1_GWF-(1,1,46)
+ Linear Solver             7        55   -1.858780E-11                    1_GWF-(1,1,48)
+
+ 7 CALLS TO NUMERICAL SOLUTION IN TIME STEP 6 STRESS PERIOD 2
+ 1502 TOTAL ITERATIONS
+
+
+ OUTER ITERATION SUMMARY
+ ---------------------------------------------------------------------------------------
+                       OUTER     INNER         MAXIMUM                    MAXIMUM CHANGE
+                   ITERATION ITERATION          CHANGE                    MODEL-(CELLID)
+ ---------------------------------------------------------------------------------------
+ Linear Solver             1       300   -5.630977E-02                    1_GWF-(1,1,53)
+ Under-relaxation          1             -5.630977E-02                    1_GWF-(1,1,53)
+ Linear Solver             2       300   -1.668749E-03                    1_GWF-(1,1,50)
+ Under-relaxation          2             -1.668749E-03                    1_GWF-(1,1,50)
+ Linear Solver             3       300    2.931471E-05                    1_GWF-(1,1,37)
+ Under-relaxation          3              2.931471E-05                    1_GWF-(1,1,37)
+ Linear Solver             4       300    9.102436E-07                    1_GWF-(1,1,48)
+ Under-relaxation          4              9.102436E-07                    1_GWF-(1,1,48)
+ Linear Solver             5        98   -2.061593E-08                    1_GWF-(1,1,35)
+ Under-relaxation          5             -2.061593E-08                    1_GWF-(1,1,35)
+ Linear Solver             6       126   -5.836043E-10                    1_GWF-(1,1,46)
+ Under-relaxation          6             -5.836043E-10                    1_GWF-(1,1,46)
+ Linear Solver             7        45   -1.101341E-11                    1_GWF-(1,1,48)
+
+ 7 CALLS TO NUMERICAL SOLUTION IN TIME STEP 7 STRESS PERIOD 2
+ 1469 TOTAL ITERATIONS
+
+
+ OUTER ITERATION SUMMARY
+ ---------------------------------------------------------------------------------------
+                       OUTER     INNER         MAXIMUM                    MAXIMUM CHANGE
+                   ITERATION ITERATION          CHANGE                    MODEL-(CELLID)
+ ---------------------------------------------------------------------------------------
+ Linear Solver             1       300   -3.309366E-02                    1_GWF-(1,1,53)
+ Under-relaxation          1             -3.309366E-02                    1_GWF-(1,1,53)
+ Linear Solver             2       300   -9.874535E-04                    1_GWF-(1,1,50)
+ Under-relaxation          2             -9.874535E-04                    1_GWF-(1,1,50)
+ Linear Solver             3       300    1.733251E-05                    1_GWF-(1,1,37)
+ Under-relaxation          3              1.733251E-05                    1_GWF-(1,1,37)
+ Linear Solver             4       300    5.406491E-07                    1_GWF-(1,1,48)
+ Under-relaxation          4              5.406491E-07                    1_GWF-(1,1,48)
+ Linear Solver             5        89   -1.223638E-08                    1_GWF-(1,1,35)
+ Under-relaxation          5             -1.223638E-08                    1_GWF-(1,1,35)
+ Linear Solver             6       134   -3.380691E-10                    1_GWF-(1,1,45)
+ Under-relaxation          6             -3.380691E-10                    1_GWF-(1,1,45)
+ Linear Solver             7        31   -4.924061E-12                    1_GWF-(1,1,47)
+
+ 7 CALLS TO NUMERICAL SOLUTION IN TIME STEP 8 STRESS PERIOD 2
+ 1454 TOTAL ITERATIONS
+
+
+ OUTER ITERATION SUMMARY
+ ---------------------------------------------------------------------------------------
+                       OUTER     INNER         MAXIMUM                    MAXIMUM CHANGE
+                   ITERATION ITERATION          CHANGE                    MODEL-(CELLID)
+ ---------------------------------------------------------------------------------------
+ Linear Solver             1       300   -1.945240E-02                    1_GWF-(1,1,53)
+ Under-relaxation          1             -1.945240E-02                    1_GWF-(1,1,53)
+ Linear Solver             2       300   -5.827684E-04                    1_GWF-(1,1,50)
+ Under-relaxation          2             -5.827684E-04                    1_GWF-(1,1,50)
+ Linear Solver             3       300    1.022435E-05                    1_GWF-(1,1,37)
+ Under-relaxation          3              1.022435E-05                    1_GWF-(1,1,37)
+ Linear Solver             4       283    3.197766E-07                    1_GWF-(1,1,48)
+ Under-relaxation          4              3.197766E-07                    1_GWF-(1,1,48)
+ Linear Solver             5        89   -7.212847E-09                    1_GWF-(1,1,35)
+ Under-relaxation          5             -7.212847E-09                    1_GWF-(1,1,35)
+ Linear Solver             6       131   -1.962377E-10                    1_GWF-(1,1,45)
+ Under-relaxation          6             -1.962377E-10                    1_GWF-(1,1,45)
+ Linear Solver             7        25   -2.295053E-12                    1_GWF-(1,1,45)
+
+ 7 CALLS TO NUMERICAL SOLUTION IN TIME STEP 9 STRESS PERIOD 2
+ 1428 TOTAL ITERATIONS
+
+
+ OUTER ITERATION SUMMARY
+ ---------------------------------------------------------------------------------------
+                       OUTER     INNER         MAXIMUM                    MAXIMUM CHANGE
+                   ITERATION ITERATION          CHANGE                    MODEL-(CELLID)
+ ---------------------------------------------------------------------------------------
+ Linear Solver             1       300   -1.143502E-02                    1_GWF-(1,1,53)
+ Under-relaxation          1             -1.143502E-02                    1_GWF-(1,1,53)
+ Linear Solver             2       300   -3.433954E-04                    1_GWF-(1,1,50)
+ Under-relaxation          2             -3.433954E-04                    1_GWF-(1,1,50)
+ Linear Solver             3       300    6.022998E-06                    1_GWF-(1,1,37)
+ Under-relaxation          3              6.022998E-06                    1_GWF-(1,1,37)
+ Linear Solver             4       250    1.886641E-07                    1_GWF-(1,1,48)
+ Under-relaxation          4              1.886641E-07                    1_GWF-(1,1,48)
+ Linear Solver             5        88   -4.224987E-09                    1_GWF-(1,1,35)
+ Under-relaxation          5             -4.224987E-09                    1_GWF-(1,1,35)
+ Linear Solver             6       109   -1.130260E-10                    1_GWF-(1,1,44)
+ Under-relaxation          6             -1.130260E-10                    1_GWF-(1,1,44)
+ Linear Solver             7        15   -1.016076E-12                    1_GWF-(6,1,33)
+
+ 7 CALLS TO NUMERICAL SOLUTION IN TIME STEP 10 STRESS PERIOD 2
+ 1362 TOTAL ITERATIONS
+1
+                            STRESS PERIOD NO.    3, LENGTH =   200.0000    
+                            -----------------------------------------------
+
+                              NUMBER OF TIME STEPS =    10
+
+                               MULTIPLIER FOR DELT =     1.000
+
+                            INITIAL TIME STEP SIZE =   20.00000    
+
+
+ OUTER ITERATION SUMMARY
+ ---------------------------------------------------------------------------------------
+                       OUTER     INNER         MAXIMUM                    MAXIMUM CHANGE
+                   ITERATION ITERATION          CHANGE                    MODEL-(CELLID)
+ ---------------------------------------------------------------------------------------
+ Linear Solver             1       300   -9.839525E-02                    1_GWF-(1,1,52)
+ Under-relaxation          1             -9.839525E-02                    1_GWF-(1,1,52)
+ Linear Solver             2       300   -3.237901E-03                    1_GWF-(1,1,50)
+ Under-relaxation          2             -3.237901E-03                    1_GWF-(1,1,50)
+ Linear Solver             3       300    5.287427E-05                    1_GWF-(1,1,35)
+ Under-relaxation          3              5.287427E-05                    1_GWF-(1,1,35)
+ Linear Solver             4       300    1.754130E-06                    1_GWF-(1,1,47)
+ Under-relaxation          4              1.754130E-06                    1_GWF-(1,1,47)
+ Linear Solver             5       151   -3.840259E-08                    1_GWF-(1,1,33)
+ Under-relaxation          5             -3.840259E-08                    1_GWF-(1,1,33)
+ Linear Solver             6       115   -1.172303E-09                    1_GWF-(1,1,45)
+ Under-relaxation          6             -1.172303E-09                    1_GWF-(1,1,45)
+ Linear Solver             7        64   -2.534506E-11                    1_GWF-(1,1,48)
+
+ 7 CALLS TO NUMERICAL SOLUTION IN TIME STEP 1 STRESS PERIOD 3
+ 1530 TOTAL ITERATIONS
+
+
+ OUTER ITERATION SUMMARY
+ ---------------------------------------------------------------------------------------
+                       OUTER     INNER         MAXIMUM                    MAXIMUM CHANGE
+                   ITERATION ITERATION          CHANGE                    MODEL-(CELLID)
+ ---------------------------------------------------------------------------------------
+ Linear Solver             1       300   -6.102379E-02                    1_GWF-(1,1,52)
+ Under-relaxation          1             -6.102379E-02                    1_GWF-(1,1,52)
+ Linear Solver             2       300   -1.926572E-03                    1_GWF-(1,1,50)
+ Under-relaxation          2             -1.926572E-03                    1_GWF-(1,1,50)
+ Linear Solver             3       300    3.326256E-05                    1_GWF-(1,1,36)
+ Under-relaxation          3              3.326256E-05                    1_GWF-(1,1,36)
+ Linear Solver             4       300    1.074910E-06                    1_GWF-(1,1,47)
+ Under-relaxation          4              1.074910E-06                    1_GWF-(1,1,47)
+ Linear Solver             5       107   -2.447162E-08                    1_GWF-(1,1,34)
+ Under-relaxation          5             -2.447162E-08                    1_GWF-(1,1,34)
+ Linear Solver             6       125   -7.216769E-10                    1_GWF-(1,1,46)
+ Under-relaxation          6             -7.216769E-10                    1_GWF-(1,1,46)
+ Linear Solver             7        50   -1.313794E-11                    1_GWF-(1,1,48)
+
+ 7 CALLS TO NUMERICAL SOLUTION IN TIME STEP 2 STRESS PERIOD 3
+ 1482 TOTAL ITERATIONS
+
+
+ OUTER ITERATION SUMMARY
+ ---------------------------------------------------------------------------------------
+                       OUTER     INNER         MAXIMUM                    MAXIMUM CHANGE
+                   ITERATION ITERATION          CHANGE                    MODEL-(CELLID)
+ ---------------------------------------------------------------------------------------
+ Linear Solver             1       300   -3.644652E-02                    1_GWF-(1,1,53)
+ Under-relaxation          1             -3.644652E-02                    1_GWF-(1,1,53)
+ Linear Solver             2       300   -1.141215E-03                    1_GWF-(1,1,50)
+ Under-relaxation          2             -1.141215E-03                    1_GWF-(1,1,50)
+ Linear Solver             3       300    1.989331E-05                    1_GWF-(1,1,36)
+ Under-relaxation          3              1.989331E-05                    1_GWF-(1,1,36)
+ Linear Solver             4       300    6.406177E-07                    1_GWF-(1,1,47)
+ Under-relaxation          4              6.406177E-07                    1_GWF-(1,1,47)
+ Linear Solver             5        88   -1.470707E-08                    1_GWF-(1,1,34)
+ Under-relaxation          5             -1.470707E-08                    1_GWF-(1,1,34)
+ Linear Solver             6       134   -4.230287E-10                    1_GWF-(1,1,45)
+ Under-relaxation          6             -4.230287E-10                    1_GWF-(1,1,45)
+ Linear Solver             7        33   -5.982770E-12                    1_GWF-(1,1,47)
+
+ 7 CALLS TO NUMERICAL SOLUTION IN TIME STEP 3 STRESS PERIOD 3
+ 1455 TOTAL ITERATIONS
+
+
+ OUTER ITERATION SUMMARY
+ ---------------------------------------------------------------------------------------
+                       OUTER     INNER         MAXIMUM                    MAXIMUM CHANGE
+                   ITERATION ITERATION          CHANGE                    MODEL-(CELLID)
+ ---------------------------------------------------------------------------------------
+ Linear Solver             1       300   -2.154063E-02                    1_GWF-(1,1,53)
+ Under-relaxation          1             -2.154063E-02                    1_GWF-(1,1,53)
+ Linear Solver             2       300   -6.742799E-04                    1_GWF-(1,1,50)
+ Under-relaxation          2             -6.742799E-04                    1_GWF-(1,1,50)
+ Linear Solver             3       300    1.177435E-05                    1_GWF-(1,1,36)
+ Under-relaxation          3              1.177435E-05                    1_GWF-(1,1,36)
+ Linear Solver             4       288    3.795170E-07                    1_GWF-(1,1,47)
+ Under-relaxation          4              3.795170E-07                    1_GWF-(1,1,47)
+ Linear Solver             5        85   -8.706799E-09                    1_GWF-(1,1,34)
+ Under-relaxation          5             -8.706799E-09                    1_GWF-(1,1,34)
+ Linear Solver             6       133   -2.447322E-10                    1_GWF-(1,1,45)
+ Under-relaxation          6             -2.447322E-10                    1_GWF-(1,1,45)
+ Linear Solver             7        27   -3.282707E-12                    1_GWF-(1,1,46)
+
+ 7 CALLS TO NUMERICAL SOLUTION IN TIME STEP 4 STRESS PERIOD 3
+ 1433 TOTAL ITERATIONS
+
+
+ OUTER ITERATION SUMMARY
+ ---------------------------------------------------------------------------------------
+                       OUTER     INNER         MAXIMUM                    MAXIMUM CHANGE
+                   ITERATION ITERATION          CHANGE                    MODEL-(CELLID)
+ ---------------------------------------------------------------------------------------
+ Linear Solver             1       300   -1.269543E-02                    1_GWF-(1,1,53)
+ Under-relaxation          1             -1.269543E-02                    1_GWF-(1,1,53)
+ Linear Solver             2       300   -3.978495E-04                    1_GWF-(1,1,50)
+ Under-relaxation          2             -3.978495E-04                    1_GWF-(1,1,50)
+ Linear Solver             3       300    6.949332E-06                    1_GWF-(1,1,36)
+ Under-relaxation          3              6.949332E-06                    1_GWF-(1,1,36)
+ Linear Solver             4       261    2.242648E-07                    1_GWF-(1,1,47)
+ Under-relaxation          4              2.242648E-07                    1_GWF-(1,1,47)
+ Linear Solver             5        84   -5.118125E-09                    1_GWF-(1,1,34)
+ Under-relaxation          5             -5.118125E-09                    1_GWF-(1,1,34)
+ Linear Solver             6       113   -1.412204E-10                    1_GWF-(1,1,44)
+ Under-relaxation          6             -1.412204E-10                    1_GWF-(1,1,44)
+ Linear Solver             7        22   -1.620037E-12                    1_GWF-(6,1,34)
+
+ 7 CALLS TO NUMERICAL SOLUTION IN TIME STEP 5 STRESS PERIOD 3
+ 1380 TOTAL ITERATIONS
+
+
+ OUTER ITERATION SUMMARY
+ ---------------------------------------------------------------------------------------
+                       OUTER     INNER         MAXIMUM                    MAXIMUM CHANGE
+                   ITERATION ITERATION          CHANGE                    MODEL-(CELLID)
+ ---------------------------------------------------------------------------------------
+ Linear Solver             1       300   -7.477016E-03                    1_GWF-(1,1,53)
+ Under-relaxation          1             -7.477016E-03                    1_GWF-(1,1,53)
+ Linear Solver             2       300   -2.345587E-04                    1_GWF-(1,1,50)
+ Under-relaxation          2             -2.345587E-04                    1_GWF-(1,1,50)
+ Linear Solver             3       300    4.097147E-06                    1_GWF-(1,1,36)
+ Under-relaxation          3              4.097147E-06                    1_GWF-(1,1,36)
+ Linear Solver             4       232    1.323280E-07                    1_GWF-(1,1,47)
+ Under-relaxation          4              1.323280E-07                    1_GWF-(1,1,47)
+ Linear Solver             5        89   -2.992216E-09                    1_GWF-(1,1,34)
+ Under-relaxation          5             -2.992216E-09                    1_GWF-(1,1,34)
+ Linear Solver             6        88   -7.793233E-11                    1_GWF-(1,1,43)
+
+ 6 CALLS TO NUMERICAL SOLUTION IN TIME STEP 6 STRESS PERIOD 3
+ 1309 TOTAL ITERATIONS
+
+
+ OUTER ITERATION SUMMARY
+ ---------------------------------------------------------------------------------------
+                       OUTER     INNER         MAXIMUM                    MAXIMUM CHANGE
+                   ITERATION ITERATION          CHANGE                    MODEL-(CELLID)
+ ---------------------------------------------------------------------------------------
+ Linear Solver             1       300   -4.402863E-03                    1_GWF-(1,1,53)
+ Under-relaxation          1             -4.402863E-03                    1_GWF-(1,1,53)
+ Linear Solver             2       300   -1.382210E-04                    1_GWF-(1,1,50)
+ Under-relaxation          2             -1.382210E-04                    1_GWF-(1,1,50)
+ Linear Solver             3       300    2.414295E-06                    1_GWF-(1,1,36)
+ Under-relaxation          3              2.414295E-06                    1_GWF-(1,1,36)
+ Linear Solver             4       190    7.800246E-08                    1_GWF-(1,1,47)
+ Under-relaxation          4              7.800246E-08                    1_GWF-(1,1,47)
+ Linear Solver             5       101   -1.739586E-09                    1_GWF-(1,1,34)
+ Under-relaxation          5             -1.739586E-09                    1_GWF-(1,1,34)
+ Linear Solver             6        62   -3.623768E-11                    1_GWF-(1,1,42)
+
+ 6 CALLS TO NUMERICAL SOLUTION IN TIME STEP 7 STRESS PERIOD 3
+ 1253 TOTAL ITERATIONS
+
+
+ OUTER ITERATION SUMMARY
+ ---------------------------------------------------------------------------------------
+                       OUTER     INNER         MAXIMUM                    MAXIMUM CHANGE
+                   ITERATION ITERATION          CHANGE                    MODEL-(CELLID)
+ ---------------------------------------------------------------------------------------
+ Linear Solver             1       300   -2.592546E-03                    1_GWF-(1,1,53)
+ Under-relaxation          1             -2.592546E-03                    1_GWF-(1,1,53)
+ Linear Solver             2       300   -8.142674E-05                    1_GWF-(1,1,50)
+ Under-relaxation          2             -8.142674E-05                    1_GWF-(1,1,50)
+ Linear Solver             3       300    1.422229E-06                    1_GWF-(1,1,36)
+ Under-relaxation          3              1.422229E-06                    1_GWF-(1,1,36)
+ Linear Solver             4       142    4.593700E-08                    1_GWF-(1,1,47)
+ Under-relaxation          4              4.593700E-08                    1_GWF-(1,1,47)
+ Linear Solver             5       114   -1.001055E-09                    1_GWF-(1,1,34)
+ Under-relaxation          5             -1.001055E-09                    1_GWF-(1,1,34)
+ Linear Solver             6        40   -1.310951E-11                    1_GWF-(1,1,42)
+
+ 6 CALLS TO NUMERICAL SOLUTION IN TIME STEP 8 STRESS PERIOD 3
+ 1196 TOTAL ITERATIONS
+
+
+ OUTER ITERATION SUMMARY
+ ---------------------------------------------------------------------------------------
+                       OUTER     INNER         MAXIMUM                    MAXIMUM CHANGE
+                   ITERATION ITERATION          CHANGE                    MODEL-(CELLID)
+ ---------------------------------------------------------------------------------------
+ Linear Solver             1       300   -1.526567E-03                    1_GWF-(1,1,53)
+ Under-relaxation          1             -1.526567E-03                    1_GWF-(1,1,53)
+ Linear Solver             2       300   -4.796021E-05                    1_GWF-(1,1,50)
+ Under-relaxation          2             -4.796021E-05                    1_GWF-(1,1,50)
+ Linear Solver             3       300    8.376684E-07                    1_GWF-(1,1,36)
+ Under-relaxation          3              8.376684E-07                    1_GWF-(1,1,36)
+ Linear Solver             4        97    2.701474E-08                    1_GWF-(1,1,47)
+ Under-relaxation          4              2.701474E-08                    1_GWF-(1,1,47)
+ Linear Solver             5       120   -5.662812E-10                    1_GWF-(1,1,33)
+ Under-relaxation          5             -5.662812E-10                    1_GWF-(1,1,33)
+ Linear Solver             6        37   -7.027268E-12                    1_GWF-(1,1,40)
+
+ 6 CALLS TO NUMERICAL SOLUTION IN TIME STEP 9 STRESS PERIOD 3
+ 1154 TOTAL ITERATIONS
+
+
+ OUTER ITERATION SUMMARY
+ ---------------------------------------------------------------------------------------
+                       OUTER     INNER         MAXIMUM                    MAXIMUM CHANGE
+                   ITERATION ITERATION          CHANGE                    MODEL-(CELLID)
+ ---------------------------------------------------------------------------------------
+ Linear Solver             1       300   -8.988892E-04                    1_GWF-(1,1,53)
+ Under-relaxation          1             -8.988892E-04                    1_GWF-(1,1,53)
+ Linear Solver             2       300   -2.824534E-05                    1_GWF-(1,1,50)
+ Under-relaxation          2             -2.824534E-05                    1_GWF-(1,1,50)
+ Linear Solver             3       300    4.933171E-07                    1_GWF-(1,1,36)
+ Under-relaxation          3              4.933171E-07                    1_GWF-(1,1,36)
+ Linear Solver             4        73    1.584960E-08                    1_GWF-(1,1,47)
+ Under-relaxation          4              1.584960E-08                    1_GWF-(1,1,47)
+ Linear Solver             5       122   -3.120846E-10                    1_GWF-(1,1,32)
+ Under-relaxation          5             -3.120846E-10                    1_GWF-(1,1,32)
+ Linear Solver             6        33   -4.469314E-12                    1_GWF-(1,1,34)
+
+ 6 CALLS TO NUMERICAL SOLUTION IN TIME STEP 10 STRESS PERIOD 3
+ 1128 TOTAL ITERATIONS
+
+ INFORMATION ON VARIABLES STORED IN THE MEMORY MANAGER
+ 
+ Number of allocated integer variables:   24923
+ Number of allocated real variables:    30401
+ Allocated memory in megabytes:    0.342900    
+ 
+
+ Run end date and time (yyyy/mm/dd hh:mm:ss): 2019/06/25  9:08:22
+ Elapsed run time:  1.015 Seconds
+
+ Normal termination of simulation.
