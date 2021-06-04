@@ -4,7 +4,7 @@ flopymetascript_backup/
 test.md
 test.zip
 test_model.py
-flopymetascript/yapf_play.py
+flopyparser/yapf_play.py
 
 *.chk
 *.chk.csv

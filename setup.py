@@ -3,7 +3,7 @@ import sys
 
 from setuptools import setup
 
-from flopymetascript import __version__, __name__, __author__
+from flopyparser import __version__, __name__, __author__
 
 if sys.version_info[0] != 3 or sys.version_info[1] < 4:
     print("""
@@ -20,12 +20,12 @@ setup(
     'Converts MODFLOW input files to a Python Flopy script',
     # long_description=long_description,
     version=__version__,
-    packages=['flopymetascript'],
+    packages=['flopyparser'],
     license='MIT',
     author=__author__,
     author_email='bdestombe@gmail.com',
-    url='https://github.com/bdestombe/flopymetascript',
-    download_url='https://github.com/bdestombe/flopymetascript/archive/' +
+    url='https://github.com/bdestombe/python-flopy-parser',
+    download_url='https://github.com/bdestombe/python-flopy-parser/archive/' +
                  __version__ + '.tar.gz',
     keywords=['flopy', 'groundwater', 'hydrology'],
     install_requires=[
@@ -42,7 +42,7 @@ setup(
     ],
     entry_points={
         "console_scripts":
-            ['flopymetascript = flopymetascript.flopymetascript:main']
+            ['flopyparser = flopyparser.flopyparser:main']
     })
 
 # try:
@@ -58,7 +58,7 @@ setup(
 #         long_description = f.read()
 #
 # try:
-#     from flopymetascript.model import Model
+#     from flopyparser.model import Model
 #     import io
 #     import nbformat
 #     import zipfile

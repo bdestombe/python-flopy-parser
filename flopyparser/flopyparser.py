@@ -24,7 +24,7 @@ def main():
 ## With zipfiles
 Try this first,
 ```bash
-$ flopymetascript --outbytesfile output.zip --inbytesfile input.zip --logfile log.txt
+$ flopyparser --outbytesfile output.zip --inbytesfile input.zip --logfile log.txt
 ```
 input.zip is a zip-file that contains MODFLOW input files and a single .nam file. Its content is processed and 
 written to output.zip. Some logging is written to log.txt. The `$`-sign should be omitted, and only refers to that the 
@@ -33,23 +33,23 @@ command is to be entered in the bash-commandline.
 ## Using pipes
 ```bash
 $ openssl base64 -in input.zip -out input.zip.b64
-$ flopymetascript --outbytesfile output.zip --inbase64file input.zip.b64
+$ flopyparser --outbytesfile output.zip --inbase64file input.zip.b64
 ```
-input.zip is encoded to base64 and is used as input file for flopymetascript
+input.zip is encoded to base64 and is used as input file for flopyparser
 
 ```bash
-$ flopymetascript --outbytesfile output.zip --inbase64file - < input.zip.b64
+$ flopyparser --outbytesfile output.zip --inbase64file - < input.zip.b64
 ```
-The content of input.zip.b64 is streamed/piped to flopymetascript
+The content of input.zip.b64 is streamed/piped to flopyparser
 
 ```bash
-$ openssl base64 -in input.zip | flopymetascript --outbytesfile output.zip --inbase64file -
+$ openssl base64 -in input.zip | flopyparser --outbytesfile output.zip --inbase64file -
 ```
 The same as what is done previously, however input.zip is encoded and instead of writing it to a file, it is passed
-as stdin to the inbase64file argument of flopymetascript.
+as stdin to the inbase64file argument of flopyparser.
 
 ```bash
-$ openssl base64 -in input.zip | flopymetascript --outbase64file utput.zip --inbase64file - --logfile -
+$ openssl base64 -in input.zip | flopyparser --outbase64file utput.zip --inbase64file - --logfile -
 ```
 The log file is printed to stdout.
 
@@ -86,7 +86,7 @@ the content and consequences of malicious scripts.
             setattr(namespace, self.dest, values)
 
     parser = MyParser(
-        prog='flopymetascript',
+        prog='flopyparser',
         usage=usage,
         description=description,
         epilog=epilog)

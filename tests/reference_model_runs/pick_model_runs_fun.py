@@ -11,7 +11,7 @@ import numpy.testing as npt
 from flopy.mbase import run_model
 import numpy as np
 
-from flopymetascript.model import Model
+from flopyparser.model import Model
 
 
 def get_exe_path(exe_name='mf2005'):
@@ -94,7 +94,7 @@ def fun_test_reference_run(modelname,
                                    test_model_outputdirect_dir, mf5_exe)
         assert suc, mes
 
-        # Load reference input files with flopymetascript that also outputs h and cbc.
+        # Load reference input files with flopyparser that also outputs h and cbc.
         fp_nam = os.path.join(test_model_inputdirect_dir, modelname + '.nam')
         mp = Model(load_nam=fp_nam)
 

@@ -4,7 +4,7 @@ from pprint import pformat
 from shutil import rmtree, copy2
 
 from pick_model_runs_fun import test_diff_list, load_packages_verbose, run_and_compare_h_cbc
-from flopymetascript.model import Model
+from flopyparser.model import Model
 
 """This script does three things
 1. reorganize the mf5 examples, so that each example has its own folder. Origional input files are placed in inputref.
@@ -15,7 +15,7 @@ from flopymetascript.model import Model
     and run input files. Logs are saved to the `report_inputflopyload` list.
     Succesful models: etsdrt, l1b2k, testsfr2, ibs2k, l1a2k, twrihfb, bcf2ss, restest, str, twri
     
-4. Create Python script from inputref folder with flopymetascript. Run Python script to write input files to 
+4. Create Python script from inputref folder with flopyparser. Run Python script to write input files to 
     inputmetascript
     
 Source of test models:
@@ -158,7 +158,7 @@ with open(os.path.join(test_example_dir, '../data', 'MF2005: succesful tests ste
             fh.write(pformat(k, indent=4, width=200) + ': \n')
             fh.write(pformat(v, indent=4, width=200) + '\n\n\n')
 
-# 4. Load the namefile with flopy run flopymetascript and create input files
+# 4. Load the namefile with flopy run flopyparser and create input files
 report_metascript = {}
 basenamepaths = [os.path.join(test_example_dir, mn) for mn in suc_model_runs]
 

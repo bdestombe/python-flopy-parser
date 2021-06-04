@@ -177,7 +177,7 @@ def eval_input(bytes_in):
         print("""
         
         Start testing the created scripts. By loading the input zip file and directly write the input files to a 
-        temporary folder. Then create a script using flopymetascript. Evaluate the script, that writes input files to a 
+        temporary folder. Then create a script using flopyparser. Evaluate the script, that writes input files to a 
         second temporary folder. And compare the files in the two folders. 
         
         """)
@@ -255,7 +255,7 @@ def eval_input(bytes_in):
 
                         elif l1.split('#')[0].strip() == '-1':
                             """
-                            Flopymetascript uses -1 if stressperioddata is the 
+                            flopyparser uses -1 if stressperioddata is the 
                             same as in the previous period.
                             """
                             continue
@@ -267,7 +267,7 @@ def eval_input(bytes_in):
                             print('The input files start to differ on line ',
                                   str(i + 1), ' (one-based).')
                             print('Directly after load: ', l1)
-                            print('Via Flopymetascript: ', l2)
+                            print('Via flopyparser: ', l2)
                             break
 
                 else:

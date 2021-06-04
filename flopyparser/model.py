@@ -135,6 +135,7 @@ class Model(object):
             assert i_pack in self.possible_sw_packages.keys()
 
         if load_nam:
+
             self.load_nam = Path(load_nam)
 
             assert self.load_nam.is_file(
@@ -158,12 +159,13 @@ class Model(object):
 
             # if bas:
             bas.ifrefm = True
-
+            packagelist = self.sw.get_package_list()
         else:
             self.sw = flopy.seawat.Seawat()
+            packagelist = self.sw.get_package_list()
 
         # All loaded packages
-        packagelist = self.sw.get_package_list() + add_pack
+        packagelist += add_pack
 
         if not packagelist:
             os.error('Noting to do')
@@ -213,58 +215,88 @@ class Model(object):
         unique_modules = set(
             [item['parent_str'] for name, item in loaded_packages.items()])
 
-        if 'flopy.seawat' in unique_modules:
-            main_model = 'flopy.seawat'
+        if 'flopy.mt3d' in unique_modules and 'flopy.seawat' not in unique_modules:
+            # mt3d requires a seperate mf and mt3d run
 
-        elif 'flopy.mt3d' in unique_modules:
-            main_model = 'flopy.mt3d'
+            for mod in [item for item in all_modules if item in unique_modules]:
+                pm = od()
+                pm['name'] = mod
+
+                pm['class'] = self.possible_sw_packages[mod]
+                pm['parent_str'] = 'flopy'
+                pm['loaded'] = False
+                pm['instance'] = pm['class']()
+
+                self.packages[mod] = pm
+                self.parameters[mod] = load_package(pm['instance'])
+
+                for name, item in loaded_packages.items():
+                    assert name in loaded_parameters, 'Each loaded package should have a loaded self.parameters'
+
+                    if loaded_packages[name]['parent_str'] != mod:
+                        continue
+
+                    self.packages[name] = loaded_packages[name]
+                    self.parameters[name] = loaded_parameters[name]
 
         else:
-            main_model = 'flopy.modflow'
+            # a single main_model to attach the packages to
+            if 'flopy.seawat' in unique_modules:
+                main_model = 'flopy.seawat'
 
-        pm = od()
-        pm['name'] = main_model
+            elif 'flopy.mt3d' in unique_modules:
+                main_model = 'flopy.mt3d'
 
-        pm['class'] = self.possible_sw_packages[main_model]
-        pm['parent_str'] = 'flopy'
-        pm['loaded'] = False
-        pm['instance'] = pm['class']()
+            else:
+                main_model = 'flopy.modflow'
 
-        self.packages[main_model] = pm
-        self.parameters[main_model] = load_package(pm['instance'])
+            pm = od()
+            pm['name'] = main_model
 
-        for mod in [item for item in all_modules if item in unique_modules]:
-            for name, item in loaded_packages.items():
-                assert name in loaded_parameters, 'Each loaded package should have a loaded self.parameters'
+            pm['class'] = self.possible_sw_packages[main_model]
+            pm['parent_str'] = 'flopy'
+            pm['loaded'] = False
+            pm['instance'] = pm['class']()
 
-                if loaded_packages[name]['parent_str'] != mod:
-                    continue
+            self.packages[main_model] = pm
+            self.parameters[main_model] = load_package(pm['instance'])
 
-                self.packages[name] = loaded_packages[name]
-                self.parameters[name] = loaded_parameters[name]
+            for mod in [item for item in all_modules if item in unique_modules]:
+                for name, item in loaded_packages.items():
+                    assert name in loaded_parameters, 'Each loaded package should have a loaded self.parameters'
 
-        # sanitize
-        self.script_sanitize_parentmodel(main_model)
+                    if loaded_packages[name]['parent_str'] != mod:
+                        continue
+
+                    self.packages[name] = loaded_packages[name]
+                    self.parameters[name] = loaded_parameters[name]
+
+            # sanitize
+            self.script_sanitize_parentmodel(main_model)
+
         self.script_sanitize_ncomp()
         self.script_sanitize_BTN_mfenheriting()
         self.script_sanitize_unwanted_parameters()
         self.script_sanitize_return_all_data()
-        # self.script_sanitize_ensure_2d()
+        # self.script_sanitize_ensure_2d()git remote set-url origin git@github.com:someuser/newprojectname.git
 
     def script_sanitize_parentmodel(self, main_model):
         parent = main_model.split('.')[1]
 
-        for p in self.parameters.keys():
-            if 'model' in self.parameters[p]:
-                self.parameters[p]['model'].value = parent
+        for p, v in self.parameters.items():
+            # if 'model' in v:
+            #     v['model'].value = v['parent_str'].split('.')[-1].lower()
 
-            if 'modflowmodel' in self.parameters[p]:
+            if 'model' in v:
+                v['model'].value = parent
+
+            if 'modflowmodel' in v:
                 # in flopy.mt3d and flopy.seawat
-                del self.parameters[p]['modflowmodel']
+                del v['modflowmodel']
 
             if 'mt3dmodel' in self.parameters[p]:
                 # in flopy.seawat
-                del self.parameters[p]['mt3dmodel']
+                del v['mt3dmodel']
 
     def script_sanitize_modelname(self, name):
         for pack_key, pack_val in self.parameters.items():
@@ -499,11 +531,6 @@ class Model(object):
 
         if 'BTN' not in self.parameters:
             return
-
-        ncomp = self.parameters['BTN']['ncomp'].value
-
-        # if ncomp == 1:
-        #     return
 
         ncomp_adjusts = [['DSP', 'dmcoef'], ['BTN', 'sconc'], ['RCT', 'sp1'],
                          ['RCT', 'sp2'], ['RCT', 'rc1'], ['RCT', 'rc2'],

@@ -1,5 +1,5 @@
 import os
-from flopymetascript.flopymetascript import process
+from flopyparser.flopyparser import process
 
 
 """
