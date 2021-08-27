@@ -79,4 +79,3 @@ docs/_build
 *.bak
 tests/reference_model_runs_old
 local_tests/
-IAH 2021/*idlk
