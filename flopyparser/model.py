@@ -135,6 +135,7 @@ class Model(object):
             assert i_pack in self.possible_sw_packages.keys()
 
         if load_nam:
+
             self.load_nam = Path(load_nam)
 
             assert self.load_nam.is_file(
@@ -142,15 +143,6 @@ class Model(object):
 
             f, model_ws = str(self.load_nam.name), str(self.load_nam.parent)
 
-            # self.sw = load_seawat(
-            #     f,
-            #     version="seawat",
-            #     exe_name="swtv4",
-            #     modflowmodel=None,
-            #     mt3dmodel=None,
-            #     verbose=False,
-            #     model_ws=model_ws,
-            #     load_only=load_only)
             self.sw = flopy.seawat.Seawat.load(
                 f,
                 version='seawat',
@@ -168,7 +160,6 @@ class Model(object):
             # if bas:
             bas.ifrefm = True
             packagelist = self.sw.get_package_list()
-
         else:
             self.sw = flopy.seawat.Seawat()
             packagelist = self.sw.get_package_list()
@@ -648,113 +639,3 @@ class Model(object):
                     self.parameters[pck][param].return_all_data = True
 
         pass
-
-
-def load_seawat(
-    f,
-    version="seawat",
-    exe_name="swtv4",
-    modflowmodel=None,
-    mt3dmodel=None,
-    verbose=False,
-    model_ws=".",
-    load_only=None):
-    """
-    Adapted to support previously loaded models. Load an existing model.
-
-    Parameters
-    ----------
-    f : string
-        Full path and name of SEAWAT name file.
-
-    version : string
-        The version of SEAWAT (seawat)
-        (default is seawat)
-
-    exe_name : string
-        The name of the executable to use if this loaded model is run.
-        (default is swtv4.exe)
-
-    verbose : bool
-        Write information on the load process if True.
-        (default is False)
-
-    model_ws : string
-        The path for the model workspace.
-        (default is the current working directory '.')
-
-    load_only : list of strings
-        Filetype(s) to load (e.g. ['lpf', 'adv'])
-        (default is None, which means that all will be loaded)
-
-    Returns
-    -------
-    m : flopy.seawat.swt.Seawat
-        flopy Seawat model object
-
-    Examples
-    --------
-
-    >>> import flopy
-    >>> m = flopy.seawat.swt.Seawat.load(f)
-
-    """
-    # test if name file is passed with extension (i.e., is a valid file)
-    if os.path.isfile(os.path.join(model_ws, f)):
-        modelname = f.rpartition(".")[0]
-    else:
-        modelname = f
-
-    # create instance of a seawat model and load modflow and mt3dms models
-    ms = flopy.seawat.swt.Seawat(
-        modelname=modelname,
-        namefile_ext="nam",
-        modflowmodel=modflowmodel,
-        mt3dmodel=mt3dmodel,
-        version=version,
-        exe_name=exe_name,
-        model_ws=model_ws,
-        verbose=verbose,
-    )
-
-    mf = flopy.modflow.mf.Modflow.load(
-        f,
-        version="mf2k",
-        exe_name=None,
-        verbose=verbose,
-        model_ws=model_ws,
-        load_only=load_only,
-        forgive=False,
-        check=False,
-    )
-
-    mt = flopy.mt3d.mt.Mt3dms.load(
-        f,
-        version="mt3dms",
-        exe_name=None,
-        modflowmodel=modflowmodel,
-        verbose=verbose,
-        model_ws=model_ws,
-        forgive=False,
-    )
-
-    # set listing and global files using mf objects
-    ms.lst = mf.lst
-    ms.glo = mf.glo
-
-    for p in mf.packagelist:
-        p.parent = ms
-        ms.add_package(p)
-    ms._mt = None
-    if mt is not None:
-        for p in mt.packagelist:
-            p.parent = ms
-            ms.add_package(p)
-        mt.external_units = []
-        mt.external_binflag = []
-        mt.external_fnames = []
-        ms._mt = mt
-    ms._mf = mf
-
-    # return model object
-    return ms

@@ -50,14 +50,9 @@ def fun_test_reference_run(modelname,
                            almost_equal=False):
     assert os.path.exists(
         test_model_inputref_dir), "test_example_dir does not exist"
+    # assert os.path.exists(os.path.join(test_example_dir, modelname)), "test_example_dir/modelname does not exist"
 
-    # assert isinstance(modelnames, list), "Provide argument as list"
-    # assert isinstance(mf5_exes, list), "Provide argument as list"
-    # assert isinstance(test_hdss, list), "Provide argument as list"
-    # assert isinstance(test_cbcs, list), "Provide argument as list"
-    # assert isinstance(test_ucns, list), "Provide argument as list"
-    # assert isinstance(almost_equals, list), "Provide argument as list"
-
+    # test_model_inputref_dir = os.path.join(test_example_dir, modelname, 'inputref')
 
     with tempfile.TemporaryDirectory() as test_model_inputdirect_dir, \
             tempfile.TemporaryDirectory() as test_model_outputdirect_dir, \
@@ -71,10 +66,9 @@ def fun_test_reference_run(modelname,
         for fp in input_filelist:
             copy2(fp, test_model_inputdirect_dir)
 
-        # for modelname, mf5_exe, test_hds, test_cbc, test_ucn, almost_equal in zip(modelnames, mf5_exes, test_hdss, test_cbcs, test_ucns, almost_equals):
         fp_nam = os.path.join(test_model_inputref_dir, modelname + '.nam')
 
-        m, report = load_packages_verbose(fp_nam)
+        m, report = load_packages_verbose(fp_nam, mf5_exe)
 
         # modify only the reference input files to also store heads and cbc
         m.change_model_ws(test_model_inputdirect_dir)
@@ -83,7 +77,9 @@ def fun_test_reference_run(modelname,
         # Change Output-Control params to generate heads and flows to compare.
         # Modify only the files that require chages. Therefore copy all input files from reference folder and overwrite
         # what is needed.
-        pcks_modified = prepare_model_compare_h_cbc(m, save_hds=test_hds, save_cbc=test_cbc)
+        pcks_modified = prepare_model_compare_h_cbc(m,
+                                                    save_hds=test_hds,
+                                                    save_cbc=test_cbc)
 
         for pck in pcks_modified:
             pck.write_file()
@@ -95,7 +91,7 @@ def fun_test_reference_run(modelname,
 
         # Create reference output
         suc, mes = test_inputfiles(modelname, test_model_inputdirect_dir,
-                                   test_model_outputdirect_dir, mf5_exe[0])
+                                   test_model_outputdirect_dir, mf5_exe)
         assert suc, mes
 
         # Load reference input files with flopyparser that also outputs h and cbc.
@@ -121,8 +117,8 @@ def fun_test_reference_run(modelname,
 
         # mp.change_package_parameter({'LAK': {'lakarr': test_model_inputmetascript_dir}})
         s = mp.script_model2string(print_descr=False,
-                                    width=300,
-                                    use_yapf=False)
+                                   width=300,
+                                   use_yapf=False)
 
         # Run the generated script that writes the inputfiles
         exec(s)
@@ -198,10 +194,6 @@ def test_inputfiles(modelname, test_model_inputdirect_dir,
                                  modelname + '.lst')) as fh:
                 print(''.join(fh.readlines()))
         except:
-            run_model(exe_name=mf5_exe,
-                      namefile=modelname + '.nam',
-                      model_ws=test_model_inputdirect_dir,
-                      silent=False)
             print('NO LISTFILE')
 
         assert success, message
@@ -349,16 +341,15 @@ def test_cbcfile(cbc_fp, cbc_fp_ref, almost_equal=False):
     return suc
 
 
-def load_packages_verbose(fp_nam):
+def load_packages_verbose(fp_nam, mf5_exe):
     # m = flopy.modflow.Modflow.load(fp_nam, exe_name=mf5_exe, check=False, verbose=True)
     assert os.path.exists(fp_nam), 'fp_nam does not exist'
     model_ws = os.path.dirname(fp_nam)
     m = flopy.seawat.Seawat.load(os.path.basename(fp_nam),
                                  version='seawat',
-                                 # exe_name=mf5_exe,
+                                 exe_name=mf5_exe,
                                  verbose=True,
                                  model_ws=model_ws)
-
     # try:
     #     m = flopy.modflow.Modflow.load(fp_nam, exe_name=mf5_exe, check=False, verbose=True)
     # except Exception as e:
@@ -486,8 +477,8 @@ def prepare_model_compare_h_cbc(m, save_hds=True, save_cbc=True):
         next_unit = int(max(unitnumers_in_model)) + 1
         m._mf.set_model_units(iunit0=next_unit)
 
-    # assert len(unitnumers_in_model) == len(
-    #     set(unitnumers_in_model)), 'Unit number is used multiple times'
+    assert len(unitnumers_in_model) == len(
+        set(unitnumers_in_model)), 'Unit number is used multiple times'
 
     return fhs
 
