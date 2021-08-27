@@ -1,5 +1,5 @@
 [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.573584.svg)](https://doi.org/10.5281/zenodo.573584)
-[![Build Status](https://travis-ci.com/bdestombe/python-flopy-parser.svg?branch=master)](https://travis-ci.com/bdestombe/python-flopy-parser)
+[![Build Status](https://app.travis-ci.com/bdestombe/python-flopy-parser.svg?branch=master)](https://app.travis-ci.com/bdestombe/python-flopy-parser)
 
 # Table of Content
 - [Use Cases](#use-cases)
@@ -11,7 +11,6 @@
 - [Example usage in Python](#example-usage-in-python)
   - [Using zipfiles in Python](#using-zipfiles-in-python)
   - [Using as a function in Python](#using-as-a-function-in-python)
-
 
 # flopyparser
 Converts a zip with MODFLOW input files to a zip containing Flopy script in different formats. This Flopy (Python) script can generate the intitial MODFLOW input files.
