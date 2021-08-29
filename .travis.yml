@@ -1,6 +1,7 @@
 language: python
 python:
     - "3.8"
+    - "3.9"
 cache: pip
 env:
   global:
@@ -12,6 +13,12 @@ matrix:
       dist: xenial
       env:
         - TOXENV=py38
+      services:
+        - xvfb
+    - python: '3.9'
+      dist: xenial
+      env:
+        - TOXENV=py39
       services:
         - xvfb
 
