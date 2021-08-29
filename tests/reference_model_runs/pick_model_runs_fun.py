@@ -4,7 +4,7 @@ import sys
 import tempfile
 from difflib import unified_diff
 from pprint import pprint
-from shutil import move, copy2
+from shutil import move, copy
 
 import flopy
 import numpy.testing as npt
@@ -64,7 +64,7 @@ def fun_test_reference_run(modelname,
         assert input_filelist, 'test_model_inputref_dir is empty:' + test_model_inputref_dir
 
         for fp in input_filelist:
-            copy2(fp, test_model_inputdirect_dir)
+            copy(fp, test_model_inputdirect_dir)
 
         fp_nam = os.path.join(test_model_inputref_dir, modelname + '.nam')
 

@@ -79,3 +79,5 @@ docs/_build
 *.bak
 tests/reference_model_runs_old
 local_tests/
+output.zip
+log.txt
