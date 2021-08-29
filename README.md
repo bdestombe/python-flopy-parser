@@ -1,6 +1,5 @@
 [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.573584.svg)](https://doi.org/10.5281/zenodo.573584)
-[![Build Status](https://travis-ci.com/bdestombe/python-flopy-parser.svg?branch=master)](https://travis-ci.com/bdestombe/python-flopy-parser)
-
+[![Build Status](https://app.travis-ci.com/bdestombe/python-flopy-parser.svg?branch=master)](https://app.travis-ci.com/bdestombe/python-flopy-parser)
 # Table of Content
 - [Use Cases](#use-cases)
 - [Highlights](#highlights)
