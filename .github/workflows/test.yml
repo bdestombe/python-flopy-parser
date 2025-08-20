@@ -9,12 +9,20 @@ on:
 jobs:
   test:
     runs-on: ubuntu-latest
-
+    
     steps:
+    - name: Disable man-db to speed up pandoc install
+      run: |
+        echo 'set man-db/auto-update false' | sudo debconf-communicate >/dev/null
+        sudo dpkg-reconfigure man-db
+
+    - name: Install Pandoc
+      uses: pandoc/actions/setup@v1
+
     - uses: actions/checkout@v4
     
     - name: Install uv
-      uses: astral-sh/setup-uv@v3
+      uses: astral-sh/setup-uv@v6
       with:
         version: "latest"
     
