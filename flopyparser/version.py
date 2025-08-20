@@ -1,6 +1,7 @@
-# coding=utf-8
+"""Version information for flopyparser package."""
+
 major = 1
 minor = 0
 micro = 0
 
-__version__ = '{:d}.{:d}.{:d}'.format(major, minor, micro)
+__version__ = f"{major:d}.{minor:d}.{micro:d}"

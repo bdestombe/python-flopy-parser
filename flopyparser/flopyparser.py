@@ -1,24 +1,28 @@
-# coding=utf-8
 import argparse
 import base64
 import io
-import os
 import shutil
 import sys
 from contextlib import redirect_stdout
 
-"""
-This file handles the commandline interface
+"""Command line interface for flopyparser.
 
-process can also be run, where all its arguments are file handles
+This module provides the main entry point and argument parsing for the
+flopyparser command-line tool. It handles conversion between MODFLOW
+input files (in zip format) and Flopy Python scripts.
 """
 
 
 def main():
-    """
-    Provides the command line interface receives either filenames, stdin, or stdout, sanitizes them and calls the
-    process function with file handles.
-    :return:
+    """Main entry point for the command line interface.
+
+    Provides the command line interface that receives either filenames,
+    stdin, or stdout, sanitizes them and calls the process function with
+    file handles.
+
+    Returns
+    -------
+    None
     """
     usage = """
 ## With zipfiles
@@ -26,8 +30,8 @@ Try this first,
 ```bash
 $ flopyparser --outbytesfile output.zip --inbytesfile input.zip --logfile log.txt
 ```
-input.zip is a zip-file that contains MODFLOW input files and a single .nam file. Its content is processed and 
-written to output.zip. Some logging is written to log.txt. The `$`-sign should be omitted, and only refers to that the 
+input.zip is a zip-file that contains MODFLOW input files and a single .nam file. Its content is processed and
+written to output.zip. Some logging is written to log.txt. The `$`-sign should be omitted, and only refers to that the
 command is to be entered in the bash-commandline.
 
 ## Using pipes
@@ -53,7 +57,7 @@ $ openssl base64 -in input.zip | flopyparser --outbase64file utput.zip --inbase6
 ```
 The log file is printed to stdout.
 
-You cannot send both outbase64file and logfile to stdout. They will be mixed and the resulting output file is not 
+You cannot send both outbase64file and logfile to stdout. They will be mixed and the resulting output file is not
 readable.
 """
 
@@ -62,67 +66,63 @@ Converts a zip with MODFLOW input files to a zip containing Flopy script
 """
 
     epilog = """
-No money is to be made with this service. I you find it useful, please donate to charity (be creative in choosing 
-which one) and send me a note. Thanks! The author is not affiliated with the modflow family nor Flopy. This 
-converter/generator uses the Flopy load function. Any errors/mistakes in the Flopy load functions propagate to the 
-generated script. The author has absolutely no convidense in that this script is correct and is not responsible for 
+No money is to be made with this service. I you find it useful, please donate to charity (be creative in choosing
+which one) and send me a note. Thanks! The author is not affiliated with the modflow family nor Flopy. This
+converter/generator uses the Flopy load function. Any errors/mistakes in the Flopy load functions propagate to the
+generated script. The author has absolutely no convidense in that this script is correct and is not responsible for
 the content and consequences of malicious scripts.
 """
 
     class MyParser(argparse.ArgumentParser):
-
         def error(self, message):
-            sys.stderr.write('error: %s\n' % message)
+            sys.stderr.write(f"error: {message}\n")
             self.print_help()
             sys.exit(2)
 
     class InputAction(argparse.Action):
-
         def __call__(self, parser, namespace, values, option_string=None):
             if values.name == "<stdin>" or values.name == "<stdout>":
-                raise argparse.ArgumentTypeError(
-                    "Cannot use stdin for inbytesfile or stdout for outbytesfile"
-                )
+                raise argparse.ArgumentTypeError("Cannot use stdin for inbytesfile or stdout for outbytesfile")
             setattr(namespace, self.dest, values)
 
-    parser = MyParser(
-        prog='flopyparser',
-        usage=usage,
-        description=description,
-        epilog=epilog)
-    parser.add_argument(
-        '--version', action='version', version='%(prog)s 0.1.0')
+    parser = MyParser(prog="flopyparser", usage=usage, description=description, epilog=epilog)
+    parser.add_argument("--version", action="version", version="%(prog)s 0.1.0")
 
     inputs = parser.add_mutually_exclusive_group()
     output = parser.add_mutually_exclusive_group()
 
     inputs.add_argument(
-        '--inbase64file',
-        type=argparse.FileType('r'),
+        "--inbase64file",
+        type=argparse.FileType("r"),
         required=False,
-        help='Filename or - for stdin of the input zipfile')
+        help="Filename or - for stdin of the input zipfile",
+    )
     output.add_argument(
-        '--outbase64file',
-        type=argparse.FileType('w'),
+        "--outbase64file",
+        type=argparse.FileType("w"),
         required=False,
-        help='Filename or - for stdout of the output zipfile')
+        help="Filename or - for stdout of the output zipfile",
+    )
     inputs.add_argument(
-        '--inbytesfile',
-        type=argparse.FileType('rb'),
+        "--inbytesfile",
+        type=argparse.FileType("rb"),
         required=False,
         action=InputAction,
-        help='Filename of the input zipfile')
+        help="Filename of the input zipfile",
+    )
     output.add_argument(
-        '--outbytesfile',
-        type=argparse.FileType('wb'),
+        "--outbytesfile",
+        type=argparse.FileType("wb"),
         required=False,
         action=InputAction,
-        help='Filename of the output zipfile')
+        help="Filename of the output zipfile",
+    )
     parser.add_argument(
-        '--logfile',
-        type=argparse.FileType('w'),
+        "--logfile",
+        type=argparse.FileType("w"),
         required=False,
-        help='Filename or - for stdout of the logfile')
+        help="Filename or - for stdout of the logfile",
+    )
 
     # Access the arguments as a dictionary
     kwargs = vars(parser.parse_args())
@@ -131,56 +131,70 @@ the content and consequences of malicious scripts.
     process(**kwargs)
 
 
-def process(inbase64file=None,
-            outbase64file=None,
-            inbytesfile=None,
-            outbytesfile=None,
-            logfile=None):
-    """
-    All arguments are filehandles. Assumes sane filehandles, no checking for incompatible stdin stdout combinations.
+def process(
+    inbase64file=None,
+    outbase64file=None,
+    inbytesfile=None,
+    outbytesfile=None,
+    logfile=None,
+):
+    """Process MODFLOW input files and generate Flopy scripts.
 
-    :param logfile: File handle with a write utf8 attribute of the logfile
-    :param inbase64file: File handle with a read utf8 attribute of the input zipfile and encoded with base64
-    :param outbase64file: File handle with a write utf8 attribute of the output zipfile and is encoded with base64
-    :param inbytesfile: File handle with a read bytes attribute of the input zipfile
-    :param outbytesfile: File handle with a write bytes attribute of the output zipfile
-    :return:
+    All arguments are filehandles. Assumes valid filehandles, no checking
+    for incompatible stdin/stdout combinations.
+
+    Parameters
+    ----------
+    inbase64file : file handle, optional
+        File handle with read utf8 attribute of input zipfile encoded with base64
+    outbase64file : file handle, optional
+        File handle with write utf8 attribute of output zipfile encoded with base64
+    inbytesfile : file handle, optional
+        File handle with read bytes attribute of the input zipfile
+    outbytesfile : file handle, optional
+        File handle with write bytes attribute of the output zipfile
+    logfile : file handle, optional
+        File handle with write utf8 attribute of the logfile
+
+    Returns
+    -------
+    None
     """
 
     stdout_buf = io.StringIO()
 
     with redirect_stdout(stdout_buf):
         if logfile:
-            print('\nRedirected the stdout to a temporary buffer\n')
+            print("\nRedirected the stdout to a temporary buffer\n")
 
         if logfile:
-            print('\nAbout to import metafunctions.run\n')
+            print("\nAbout to import metafunctions.run\n")
 
         # Because flopy writes stuff to stdout while importing
-        from .metafunctions import run, eval_input
+        from .metafunctions import eval_input, run
 
         if inbytesfile:
-            print('\ninbytes file handle\n')
+            print("\ninbytes file handle\n")
             inbytes = inbytesfile
 
         elif inbase64file:
-            print('\ninbase64 file handle\n')
+            print("\ninbase64 file handle\n")
 
             inbytes = io.BytesIO()
-            if hasattr(inbase64file, 'read'):
+            if hasattr(inbase64file, "read"):
                 inbytes.write(base64.b64decode(inbase64file.read()))
             else:
                 inbytes.write(base64.b64decode(inbase64file))
             inbytes.seek(0)
 
         else:
-            print('\nNo input files are given. I am about to throw an error\n')
-            os.error('No input files are given')
+            print("\nNo input files are given. I am about to throw an error\n")
+            OSError("No input files are given")
 
         # To prevent error messages when run without arguments
         if inbytesfile or inbase64file:
-            bytesZip = run(inbytes)
-            bytesZip.seek(0)
+            bytes_zip = run(inbytes)
+            bytes_zip.seek(0)
 
             # evaluate the input files and write report to log
             eval_input(inbytes)
@@ -191,14 +205,14 @@ def process(inbase64file=None,
 
     # write output
     if outbytesfile:
-        shutil.copyfileobj(bytesZip, outbytesfile)
+        shutil.copyfileobj(bytes_zip, outbytesfile)
 
     elif outbase64file:
-        outbase64file.write(base64.urlsafe_b64encode(bytesZip.read()).decode())
-        # outb64 = base64.b64encode(bytesZip.read())
+        outbase64file.write(base64.urlsafe_b64encode(bytes_zip.read()).decode())
+        # outb64 = base64.b64encode(bytes_zip.read())
         # outbase64file.write(outb64.decode('ascii'))
 
     else:
-        print('Im not doing anything')
+        print("Im not doing anything")
 
     return

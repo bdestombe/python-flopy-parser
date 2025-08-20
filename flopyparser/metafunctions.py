@@ -1,4 +1,9 @@
-# coding=utf-8
+"""High-level processing functions for MODFLOW model conversion.
+
+This module contains functions for processing zip files containing MODFLOW
+input files and converting them to Flopy scripts in various formats.
+"""
+
 import glob
 import hashlib
 import io
@@ -14,14 +19,34 @@ from .model import Model
 
 
 def run(bytes_in):
+    """Process MODFLOW input zip file and generate Flopy scripts.
+
+    Takes a zip file containing MODFLOW input files and converts them
+    to Flopy Python scripts in multiple output formats (ipynb, tex, html, etc.).
+
+    Parameters
+    ----------
+    bytes_in : BytesIO
+        Byte stream containing zip file with MODFLOW input files
+
+    Returns
+    -------
+    BytesIO
+        Byte stream containing output zip file with generated scripts
+
+    Raises
+    ------
+    AssertionError
+        If no .nam file is found or multiple .nam files are present
+    """
     myzipfile = zipfile.ZipFile(bytes_in)
 
     with TemporaryDirectory() as temp_dir:
         """Automatically deletes temp_dir if an error occurs"""
-        print('\nCreate temporary folder: ', temp_dir)
+        print("\nCreate temporary folder: ", temp_dir)
 
-        out_formats = ['latex', 'html', 'slides', 'rst', 'markdown']
-        out_formats_ext = ['tex', 'html', 'slides.html', 'rst', 'md']
+        out_formats = ["latex", "html", "slides", "rst", "markdown"]
+        out_formats_ext = ["tex", "html", "slides.html", "rst", "md"]
 
         # find nam files:
         all_nam_files = []
@@ -30,83 +55,93 @@ def run(bytes_in):
                 # folder
                 continue
 
-            elif f.filename[0] == '_':
+            elif f.filename[0] == "_":
                 # private
                 continue
 
-            elif os.path.basename(f.filename)[0] == '.':
+            elif os.path.basename(f.filename)[0] == ".":
                 # private
                 continue
 
-            elif f.filename.lower()[-4:] == '.nam':
+            elif f.filename.lower()[-4:] == ".nam":
                 all_nam_files.append(f)
 
             else:
                 pass
 
-        assert len(
-            all_nam_files
-        ) != 0, "The input zip does not contain a .nam nor a .NAM file."
+        assert len(all_nam_files) != 0, "The input zip does not contain a .nam nor a .NAM file."
 
-        assert len(
-            all_nam_files) == 1, "The zip can only contain a single name file." + \
-                                 "The nam files in the zip are: {0}".format(all_nam_files)
+        assert len(all_nam_files) == 1, (
+            "The zip can only contain a single name file." + f"The nam files in the zip are: {all_nam_files}"
+        )
 
         # directory name nam file
-        nam_dir = os.path.join(os.path.dirname(all_nam_files[0].filename), '')
+        nam_dir = os.path.join(os.path.dirname(all_nam_files[0].filename), "")
 
         for f in myzipfile.infolist():
             if f.is_dir():
                 # folder
                 continue
 
-            elif f.filename[0] == '_':
+            elif f.filename[0] == "_":
                 # private
                 continue
 
-            elif os.path.basename(f.filename)[0] == '.':
+            elif os.path.basename(f.filename)[0] == ".":
                 # private
                 continue
 
-            elif f.filename[:len(nam_dir)] == nam_dir:
-                old_name = f.filename
-                f.filename = f.filename[len(nam_dir):]
-                new_name = f.filename
-                s = 'Copying {0:s} to {1:s}'.format(f.filename, temp_dir)
+            elif f.filename[: len(nam_dir)] == nam_dir:
+                f.filename = f.filename[len(nam_dir) :]
+                s = f"Copying {f.filename:s} to {temp_dir:s}"
                 print(s)
                 myzipfile.extract(f, temp_dir)
 
         # location to nam file. Always on top of directory
-        nam_fp = os.path.join(temp_dir,
-                              os.path.basename(all_nam_files[0].filename))
+        nam_fp = os.path.join(temp_dir, os.path.basename(all_nam_files[0].filename))
 
-        assert os.path.isfile(nam_fp), f'{nam_fp} does not exist'
+        assert os.path.isfile(nam_fp), f"{nam_fp} does not exist"
         mp = Model(nam_fp)
         nb = mp.script_model2nb(use_yapf=False)
 
         buff = io.BytesIO()
-        zip_out = zipfile.ZipFile(buff, 'w')
+        zip_out = zipfile.ZipFile(buff, "w")
 
         ipynb_buff = io.StringIO(nbformat.writes(nb))
-        zip_out.writestr('test.ipynb', ipynb_buff.getvalue())
+        zip_out.writestr("test.ipynb", ipynb_buff.getvalue())
 
-        for out_formats_item, out_formats_ext_item in zip(
-                out_formats, out_formats_ext):
+        for out_formats_item, out_formats_ext_item in zip(out_formats, out_formats_ext, strict=False):
             ipynb_buff.seek(0)
-            zip_out.writestr('test.' + out_formats_ext_item,
-                             nbconvert.export(
-                                 nbconvert.get_exporter(out_formats_item),
-                                 ipynb_buff)[0])
+            zip_out.writestr(
+                "test." + out_formats_ext_item,
+                nbconvert.export(nbconvert.get_exporter(out_formats_item), ipynb_buff)[0],
+            )
 
         ipynb_buff.close()
         zip_out.close()
-        print('\nContent of the zipfile:')
+        print("\nContent of the zipfile:")
         zip_out.printdir()
 
     return buff
 
 
 def eval_input(bytes_in):
+    """Evaluate generated Flopy script by comparing with original model output.
+
+    Tests the generated Flopy scripts by loading the original MODFLOW model,
+    writing input files, then executing the generated script and comparing
+    the output files for consistency.
+
+    Parameters
+    ----------
+    bytes_in : BytesIO
+        Byte stream containing zip file with MODFLOW input files
+
+    Notes
+    -----
+    This function creates temporary directories to test script execution
+    and compares generated files with original model output using MD5 hashes.
+    """
     myzipfile = zipfile.ZipFile(bytes_in)
 
     with TemporaryDirectory() as temp_dir:
@@ -117,130 +152,119 @@ def eval_input(bytes_in):
                 # folder
                 continue
 
-            elif f.filename[0] == '_':
+            elif f.filename[0] == "_":
                 # private
                 continue
 
-            elif os.path.basename(f.filename)[0] == '.':
+            elif os.path.basename(f.filename)[0] == ".":
                 # private
                 continue
 
-            elif f.filename.lower()[-4:] == '.nam':
+            elif f.filename.lower()[-4:] == ".nam":
                 all_nam_files.append(f)
 
             else:
                 pass
 
-        assert len(
-            all_nam_files
-        ) != 0, "The input zip does not contain a .nam nor a .NAM file."
+        assert len(all_nam_files) != 0, "The input zip does not contain a .nam nor a .NAM file."
 
-        assert len(
-            all_nam_files) == 1, "The zip can only contain a single name file." + \
-                                 "The nam files in the zip are: {0}".format(all_nam_files)
+        assert len(all_nam_files) == 1, (
+            "The zip can only contain a single name file." + f"The nam files in the zip are: {all_nam_files}"
+        )
 
         # directory name nam file
-        nam_dir = os.path.join(os.path.dirname(all_nam_files[0].filename), '')
+        nam_dir = os.path.join(os.path.dirname(all_nam_files[0].filename), "")
 
         for f in myzipfile.infolist():
             if f.is_dir():
                 # folder
                 continue
 
-            elif f.filename[0] == '_':
+            elif f.filename[0] == "_":
                 # private
                 continue
 
-            elif os.path.basename(f.filename)[0] == '.':
+            elif os.path.basename(f.filename)[0] == ".":
                 # private
                 continue
 
-            elif f.filename[:len(nam_dir)] == nam_dir:
-                old_name = f.filename
-                f.filename = f.filename[len(nam_dir):]
-                new_name = f.filename
-                s = 'Copying {0:s} to {1:s}'.format(f.filename, temp_dir)
+            elif f.filename[: len(nam_dir)] == nam_dir:
+                f.filename = f.filename[len(nam_dir) :]
+                s = f"Copying {f.filename:s} to {temp_dir:s}"
                 print(s)
                 myzipfile.extract(f, temp_dir)
 
         # location to nam file. Always on top of directory
-        nam_fp = os.path.join(temp_dir,
-                              os.path.basename(all_nam_files[0].filename))
+        nam_fp = os.path.join(temp_dir, os.path.basename(all_nam_files[0].filename))
 
-        filenames_input = glob.glob(os.path.join(temp_dir, '*'))
+        filenames_input = glob.glob(os.path.join(temp_dir, "*"))
         print(filenames_input)
 
         mp = Model(nam_fp)
 
-    with TemporaryDirectory() as temp_dir_sane_input, TemporaryDirectory(
-    ) as temp_dir_made_input:
+    with (
+        TemporaryDirectory() as temp_dir_sane_input,
+        TemporaryDirectory() as temp_dir_made_input,
+    ):
         print("""
-        
-        Start testing the created scripts. By loading the input zip file and directly write the input files to a 
-        temporary folder. Then create a script using flopyparser. Evaluate the script, that writes input files to a 
-        second temporary folder. And compare the files in the two folders. 
-        
+
+        Start testing the created scripts. By loading the input zip file and directly write the input files to a
+        temporary folder. Then create a script using flopyparser. Evaluate the script, that writes input files to a
+        second temporary folder. And compare the files in the two folders.
+
         """)
-        print('\nCreate temporary folder to write loaded input files: ',
-              temp_dir_sane_input)
+        print(
+            "\nCreate temporary folder to write loaded input files: ",
+            temp_dir_sane_input,
+        )
         mp.sw.change_model_ws(temp_dir_sane_input)
         mp.sw.write_input()
 
-        _, _, filenames_sane_output = next(
-            os.walk(temp_dir_sane_input), (None, None, []))
-        print('These files were created directly after loading',
-              filenames_sane_output)
+        _, _, filenames_sane_output = next(os.walk(temp_dir_sane_input), (None, None, []))
+        print("These files were created directly after loading", filenames_sane_output)
 
-        d = {'model_ws': temp_dir_made_input}
+        d = {"model_ws": temp_dir_made_input}
         mp.change_all_pack_parameter(d)
 
-        s = mp.script_model2string(
-            print_descr=False, width=99, bonus_space=0, use_yapf=False)
-        print('about to eval the string')
+        s = mp.script_model2string(print_descr=False, width=99, bonus_space=0, use_yapf=False)
+        print("about to eval the string")
 
         try:
             exec(s)
-        except:
-            print('The generated scripts contain errors and dont run well')
+        except Exception:
+            print("The generated scripts contain errors and dont run well")
 
-        _, _, filenames_output = next(
-            os.walk(temp_dir_made_input), (None, None, []))
-        print('\nThese files were just created by our generated script',
-              filenames_output)
+        _, _, filenames_output = next(os.walk(temp_dir_made_input), (None, None, []))
+        print("\nThese files were just created by our generated script", filenames_output)
 
         f_not_the_same = []
         f_are_the_same = []
         f_function_diff = []
 
-        assert len(filenames_sane_output) == len(
-            filenames_output), 'Not enough inputfiles were written'
+        assert len(filenames_sane_output) == len(filenames_output), "Not enough inputfiles were written"
 
         for fn in filenames_output:
             try:
                 path_out = os.path.join(temp_dir_made_input, fn)
-                hash_out = hashlib.md5(open(path_out, 'rb').read()).hexdigest()
+                hash_out = hashlib.md5(open(path_out, "rb").read()).hexdigest()
 
                 path_sane = os.path.join(temp_dir_sane_input, fn)
                 path_sane_odj = Path(path_sane)
-                path_sane_alt = glob.glob(
-                    os.path.join(temp_dir_sane_input, '*' +
-                                 path_sane_odj.suffix))[0]
+                path_sane_alt = glob.glob(os.path.join(temp_dir_sane_input, "*" + path_sane_odj.suffix))[0]
                 path_sane = path_sane_alt
-                hash_sane = hashlib.md5(
-                    open(path_sane, 'rb').read()).hexdigest()
+                hash_sane = hashlib.md5(open(path_sane, "rb").read()).hexdigest()
 
                 if hash_sane != hash_out:
                     f_not_the_same.append(fn)
 
-                    text1_split = open(path_out, 'r').read().splitlines()
-                    text2_split = open(path_sane, 'r').read().splitlines()
+                    text1_split = open(path_out).read().splitlines()
+                    text2_split = open(path_sane).read().splitlines()
 
-                    for i, (l1,
-                            l2) in enumerate(zip(text1_split, text2_split)):
+                    for i, (l1, l2) in enumerate(zip(text1_split, text2_split, strict=False)):
                         if l1 == l2:
                             continue
 
-                        elif l1[0] == '#' and l2[0] == '#':
+                        elif l1[0] == "#" and l2[0] == "#":
                             # comment line
                             continue
 
@@ -248,41 +272,41 @@ def eval_input(bytes_in):
                             # An extra space appeared somewhere
                             continue
 
-                        elif l1.split('#')[0].strip() == l2.split('#')[
-                            0].strip():
+                        elif l1.split("#")[0].strip() == l2.split("#")[0].strip():
                             # Everything before the comment is the same
                             continue
 
-                        elif l1.split('#')[0].strip() == '-1':
+                        elif l1.split("#")[0].strip() == "-1":
                             """
-                            flopyparser uses -1 if stressperioddata is the 
+                            flopyparser uses -1 if stressperioddata is the
                             same as in the previous period.
                             """
                             continue
 
                         else:
                             f_function_diff.append(fn)
-                            print(79 * '#')
+                            print(79 * "#")
                             print(fn)
-                            print('The input files start to differ on line ',
-                                  str(i + 1), ' (one-based).')
-                            print('Directly after load: ', l1)
-                            print('Via flopyparser: ', l2)
+                            print(
+                                "The input files start to differ on line ",
+                                str(i + 1),
+                                " (one-based).",
+                            )
+                            print("Directly after load: ", l1)
+                            print("Via flopyparser: ", l2)
                             break
 
                 else:
                     f_are_the_same.append(fn)
 
-            except:
+            except Exception:
                 # Apparently the extension has changed. Now it becomes
                 # impossible to relate and compare the two input files
-                print('Unable to compare ', fn)
+                print("Unable to compare ", fn)
 
-    f_function_the_same = f_are_the_same + [
-        item for item in f_not_the_same if item not in f_function_diff
-    ]
+    f_function_the_same = f_are_the_same + [item for item in f_not_the_same if item not in f_function_diff]
 
-    print('\nFiles that are the same:       ', f_are_the_same)
-    print('Files that are not the same:   ', f_not_the_same)
-    print('Files that function the same:  ', f_function_the_same)
-    print('Files that function different: ', f_function_diff)
+    print("\nFiles that are the same:       ", f_are_the_same)
+    print("Files that are not the same:   ", f_not_the_same)
+    print("Files that function the same:  ", f_function_the_same)
+    print("Files that function different: ", f_function_diff)

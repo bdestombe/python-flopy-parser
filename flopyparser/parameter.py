@@ -1,4 +1,10 @@
-# coding=utf-8
+"""Parameter handling and string formatting for Flopy objects.
+
+This module contains the Parameter class for handling different data types
+and formats used in MODFLOW packages, with capabilities for compression,
+string representation, and code generation.
+"""
+
 import pprint
 import textwrap
 
@@ -7,22 +13,46 @@ import numpy as np
 from yapf.yapflib.yapf_api import FormatCode
 
 
-class Parameter(object):
-    """
-    Contains the value in different formats.
-    - raw: as was used in the construction of the class
-    - value: ndarrays and pure python types. No mflists and flopy-2Darrays
-    - compressed: the value is broadcastable to value
+class Parameter:
+    """Container for parameter values in different formats.
 
-    - __get__ returns the value [?]
+    This class handles parameter values from Flopy packages and provides
+    different representations:
+    - raw: as was used in the construction of the class
+    - value: ndarrays and pure python types (no mflists and flopy-2Darrays)
+    - compressed: the value is broadcastable to original value
+
+    Attributes
+    ----------
+    value : various
+        The parameter value in processed format
+    description : str
+        Description of the parameter
+    typed : str
+        Type information for the parameter
+    default : various
+        Default value for the parameter
+    kind : str
+        Parameter kind from inspection
+    return_all_data : bool
+        Whether to return all data without compression
     """
 
     def __init__(self, value, return_all_data=False):
+        """Initialize Parameter instance.
+
+        Parameters
+        ----------
+        value : various
+            The parameter value to store
+        return_all_data : bool, optional
+            Whether to return all data without compression, default False
+        """
         self.value = value
-        self.description = ''
-        self.typed = ''
-        self.default = ''
-        self.kind = ''
+        self.description = ""
+        self.typed = ""
+        self.default = ""
+        self.kind = ""
         self.return_all_data = return_all_data
 
     def __repr__(self):
@@ -41,15 +71,21 @@ class Parameter(object):
 
     @property
     def compressible(self):
-        """
-        -1: unable to reduce in size
-        0:  a value in a singleton dimension may be used
-        1:  broadcastable array
+        """Determine if parameter can be compressed.
 
-        If return_all_data then make 1 -> -1 and 0 remains 0
+        Returns
+        -------
+        int
+            Compression level:
+            -1: unable to reduce in size
+             0: a value in a singleton dimension may be used
+             1: broadcastable array
+
+        Notes
+        -----
+        If return_all_data is True, then 1 becomes -1 and 0 remains 0.
         """
         if self.return_all_data:
-
             return -(self.compressible_fun() ** 2)
 
         else:
@@ -65,6 +101,18 @@ class Parameter(object):
 
     @classmethod
     def parse_value(cls, var):
+        """Parse various Flopy data types into standard Python types.
+
+        Parameters
+        ----------
+        var : various
+            Input variable to parse (Util2d, Util3d, MfList, etc.)
+
+        Returns
+        -------
+        various
+            Parsed value in standard Python format
+        """
         if isinstance(var, str):
             value = var
 
@@ -90,12 +138,12 @@ class Parameter(object):
             value = var
 
         elif isinstance(var, list):
-            value = list()
+            value = []
 
             for ivar in var:
                 value.append(Parameter(ivar))
 
-        elif hasattr(var, 'array'):  # flopy 2D and 3D arrays
+        elif hasattr(var, "array"):  # flopy 2D and 3D arrays
             value = var.array
 
         else:
@@ -104,9 +152,9 @@ class Parameter(object):
         return value
 
     def compressible_fun(self):
-        if isinstance(
-                self.value, dict
-        ) and 'k' in self.value[0].dtype.names:  # add check for i, j, k keys in dtype of first entry
+        if (
+            isinstance(self.value, dict) and "k" in self.value[0].dtype.names
+        ):  # add check for i, j, k keys in dtype of first entry
             compressible, _ = self.parse_mflist(self.value)
 
         elif isinstance(self.value, dict):
@@ -114,12 +162,12 @@ class Parameter(object):
             compressible, _ = self.parse_mflist(self.value)
 
         elif isinstance(self.value, np.ndarray):  # flopy 2D and 3D arrays
-            '''
+            """
             tries to compress the array. Three compressible options
             -1: unable to reduce in size
             0:  a value in a singleton dimension may be used
             1:  broadcastable array
-            '''
+            """
             compressible, _ = self.parse_array(self.value)
 
         elif isinstance(self.value, list):
@@ -154,12 +202,12 @@ class Parameter(object):
             _, compressed = -1, self.value
 
         elif isinstance(self.value, np.ndarray) and not isinstance(self.value, np.recarray):  # flopy 2D and 3D arrays
-            '''
+            """
             tries to compress the array. Three compressible options
             -1: unable to reduce in size
             0:  a value in a singleton dimension may be used
             1:  broadcastable array
-            '''
+            """
             _, compressed = self.parse_array(self.value)
 
         elif isinstance(self.value, list):
@@ -171,10 +219,19 @@ class Parameter(object):
         return compressed
 
     def string_fun(self, bonus_space=0, max_line_width=np.inf):
-        """
-        :param max_line_width:
-        :param bonus_space:
-        :return: Printable string. eval(return) should evaluate to var
+        """Generate string representation of parameter value.
+
+        Parameters
+        ----------
+        bonus_space : int, optional
+            Additional indentation spaces, default 0
+        max_line_width : float, optional
+            Maximum line width for formatting, default np.inf
+
+        Returns
+        -------
+        str
+            Printable string representation where eval(return) should evaluate to var
         """
 
         if isinstance(self.value, dict):
@@ -185,25 +242,21 @@ class Parameter(object):
                     self.compressed,
                     indent=bonus_space,
                     width=max_line_width,
-                    compact=True)
-            except:
+                    compact=True,
+                )
+            except Exception:
                 string = str(self.compressed)
 
         elif isinstance(self.value, flopy.seawat.swt.Seawat):
-            string = 'sw'
+            string = "sw"
 
         elif isinstance(self.value, np.ndarray) and not isinstance(self.value, np.recarray):
-            string = self.parse_array_str(self.compressed, self.value.shape,
-                                          self.compressible)
+            string = self.parse_array_str(self.compressed, self.value.shape, self.compressible)
 
         elif isinstance(self.value, np.recarray):
             if not np.isfinite(max_line_width):
                 max_line_width = 100
-            string = pprint.pformat(
-                self.value,
-                indent=bonus_space,
-                width=max_line_width,
-                compact=True)
+            string = pprint.pformat(self.value, indent=bonus_space, width=max_line_width, compact=True)
         elif isinstance(self.value, list):
             string = self.parse_list_str(self.compressed, self.compressible)
 
@@ -214,19 +267,14 @@ class Parameter(object):
             try:
                 if not np.isfinite(max_line_width):
                     max_line_width = 100
-                string = pprint.pformat(
-                    self.value,
-                    indent=bonus_space,
-                    width=max_line_width,
-                    compact=True)
-            except:
+                string = pprint.pformat(self.value, indent=bonus_space, width=max_line_width, compact=True)
+            except Exception:
                 string = str(self.value)
 
         return string
 
     @staticmethod
     def parse_list(ar):
-
         if np.unique([item.value for item in ar]).size == 1:
             return 1, ar
         else:
@@ -247,9 +295,9 @@ class Parameter(object):
         # suppress_small = True  # to mask some rounding issues
 
         if compres == -1:
-            pre = '['
-            post = ']'
-            ar_str = ', '.join([item.string for item in ar])
+            pre = "["
+            post = "]"
+            ar_str = ", ".join([item.string for item in ar])
             string = pre + ar_str + post
 
         elif compres == 1:
@@ -258,8 +306,8 @@ class Parameter(object):
                 string = ar[0].string
 
             else:
-                pre = str(len(ar)) + ' * ['
-                post = ']'
+                pre = str(len(ar)) + " * ["
+                post = "]"
                 ar_str = ar[0].string
                 string = pre + ar_str + post
 
@@ -271,7 +319,7 @@ class Parameter(object):
 
         prev = []
 
-        for i, (k, v) in enumerate(sorted(ar.items())):
+        for _i, (k, v) in enumerate(sorted(ar.items())):
             if k == 0 or k == (0, 0):
                 out[k] = v
 
@@ -334,8 +382,7 @@ class Parameter(object):
                 else:
                     items_per_squeezed_dim[dim] = ar.size
 
-            most_squeezable_dim = items_per_squeezed_dim.index(
-                min(items_per_squeezed_dim))
+            most_squeezable_dim = items_per_squeezed_dim.index(min(items_per_squeezed_dim))
 
             if ar.size == items_per_squeezed_dim[most_squeezable_dim]:
                 return -1, ar
@@ -370,49 +417,54 @@ class Parameter(object):
             return str(ar)
 
         elif compres == -1:
-            pre = 'np.array('
-            post = ')'
+            pre = "np.array("
+            post = ")"
             ar_str = np.array2string(
                 np.array(ar),
                 max_line_width=max_line_width,
                 precision=precision,
                 suppress_small=suppress_small,
-                separator=',',
-                prefix=pre)
-            ar_str = ' '.join(ar_str.split())
+                separator=",",
+                prefix=pre,
+            )
+            ar_str = " ".join(ar_str.split())
             return pre + ar_str + post
 
         elif compres == 1:
-            pre = 'np.broadcast_to('
-            post = ', {0})'.format(orig_shape)
+            pre = "np.broadcast_to("
+            post = f", {orig_shape})"
             ar_str = np.array2string(
                 ar,
                 max_line_width=max_line_width,
                 precision=precision,
                 suppress_small=suppress_small,
-                separator=',',
-                prefix=pre)
-            ar_str = ' '.join(ar_str.split())
+                separator=",",
+                prefix=pre,
+            )
+            ar_str = " ".join(ar_str.split())
             return pre + ar_str + post
 
     def value_print_string(self, key, bonus_space=0):
-        return "".join([bonus_space * ' ', key, ' = ', self.string])
+        return "".join([bonus_space * " ", key, " = ", self.string])
 
     def print_string2(self, key, width=99, bonus_space=0, use_yapf=True):
-        style = '{based_on_style: google, indent_width: 4, split_before_named_assigns: False, column_limit: ' + str(
-            width) + '}'
-        prelude = key + ' = '
+        style = (
+            "{based_on_style: google, indent_width: 4, split_before_named_assigns: False, column_limit: "
+            + str(width)
+            + "}"
+        )
+        prelude = key + " = "
 
-        if key == 'model':
+        if key == "model":
             s = self.string[1:-1]
 
-        elif key == 'dtype' and self.string[:15] == '(numpy.record, ':
+        elif key == "dtype" and self.string[:15] == "(numpy.record, ":
             # dtype in most packages
             s = "np.dtype(" + self.string[15:]
 
-        elif key == 'dtype' and self.string[:3] == "[('":
+        elif key == "dtype" and self.string[:3] == "[('":
             # SSM dtype
-            s = "np.dtype(" + self.string + ')'
+            s = "np.dtype(" + self.string + ")"
 
         else:
             s = self.string
@@ -422,15 +474,13 @@ class Parameter(object):
             s3 = FormatCode(prelude + s, style_config=style)[0][:-1]
 
         else:
-            if key == 'stress_period_data':
-                s1 = self.print_string1(
-                    s, prelude, width=width - 1, bonus_space=bonus_space)
-                s1 = '\\\n'.join(s1)
+            if key == "stress_period_data":
+                s1 = self.print_string1(s, prelude, width=width - 1, bonus_space=bonus_space)
+                s1 = "\\\n".join(s1)
             else:
-                s1 = self.print_string1(
-                    s, prelude, width=width, bonus_space=bonus_space)
-                s1 = '\n'.join(s1)
-            s3 = ' ' * bonus_space + prelude + s1[len(prelude) + bonus_space:]
+                s1 = self.print_string1(s, prelude, width=width, bonus_space=bonus_space)
+                s1 = "\n".join(s1)
+            s3 = " " * bonus_space + prelude + s1[len(prelude) + bonus_space :]
 
         return s3
 
@@ -443,28 +493,49 @@ class Parameter(object):
         return textwrap.wrap(
             string,
             width=width,
-            initial_indent=' ' * (bonus_space + len(prelude)),
-            subsequent_indent=' ' * (bonus_space + len(prelude)),
+            initial_indent=" " * (bonus_space + len(prelude)),
+            subsequent_indent=" " * (bonus_space + len(prelude)),
             break_on_hyphens=False,
-            break_long_words=False)
+            break_long_words=False,
+        )
 
     def print_descr(self, width=99, bonus_space=0):
         s = textwrap.fill(
             self.description,
             width=width - 2,
-            initial_indent=' ' * bonus_space,
-            subsequent_indent=' ' * (bonus_space + 2),
+            initial_indent=" " * bonus_space,
+            subsequent_indent=" " * (bonus_space + 2),
             break_on_hyphens=False,
-            break_long_words=False)
-        s2 = '\n'.join(['# ' + s1 for s1 in s.splitlines()])
+            break_long_words=False,
+        )
+        s2 = "\n".join(["# " + s1 for s1 in s.splitlines()])
         return s2
 
 
-def uniquend(ar,
-             return_index=False,
-             return_inverse=False,
-             return_counts=False,
-             axis=None):
+def uniquend(ar, return_index=False, return_inverse=False, return_counts=False, axis=None):
+    """Find unique elements along specified axis.
+
+    This function provides unique functionality along specified axes,
+    similar to numpy.unique but with axis support for older numpy versions.
+
+    Parameters
+    ----------
+    ar : numpy.ndarray
+        Input array
+    return_index : bool, optional
+        If True, return indices of unique elements, default False
+    return_inverse : bool, optional
+        If True, return inverse indices, default False
+    return_counts : bool, optional
+        If True, return counts of unique elements, default False
+    axis : int, optional
+        Axis along which to find unique elements, default None (flattened)
+
+    Returns
+    -------
+    numpy.ndarray or tuple
+        Unique elements, optionally with indices, inverse, and/or counts
+    """
     # this is becoming a built-in feature in numpy 1.13
 
     assert isinstance(ar, np.ndarray)
@@ -477,7 +548,8 @@ def uniquend(ar,
             ar,
             return_index=return_index,
             return_inverse=return_inverse,
-            return_counts=return_counts)
+            return_counts=return_counts,
+        )
 
     ar = np.swapaxes(ar, axis, 0)
     orig_shape, orig_dtype = ar.shape, ar.dtype
@@ -497,8 +569,7 @@ def uniquend(ar,
         uniq = np.swapaxes(uniq, 0, axis)
         return uniq
 
-    output = np.unique(consolidated, return_index, return_inverse,
-                       return_counts)
+    output = np.unique(consolidated, return_index, return_inverse, return_counts)
 
     if not (return_index or return_inverse or return_counts):
         return reshape_uniq(output)

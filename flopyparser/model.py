@@ -1,8 +1,12 @@
-# coding=utf-8
+"""Model parsing and script generation for MODFLOW models.
+
+This module contains the core Model class that handles loading MODFLOW models,
+extracting parameters, and generating Flopy Python scripts and Jupyter notebooks.
+"""
+
 import inspect
-import os
 import textwrap
-from collections import OrderedDict as od
+from collections import OrderedDict
 from functools import partial
 from itertools import chain
 from pathlib import Path
@@ -15,39 +19,41 @@ from .parameter import Parameter
 
 
 def get_doc_info(s):
-    """
-    Is used in load function.
+    """Extract parameter information from docstring.
 
-    todo:
-    make staticmethod of Model class
+    Parses a docstring to extract parameter type and description information.
 
-    usage:
-    s = instance.__doc__
-    info = get_doc_info(s)
+    Parameters
+    ----------
+    s : str
+        The docstring to parse
 
-    for k_info, v_info in info.items():
-        if k_info in p:
-            typed, description = v_info
-            p[k_info].typed = typed
-            p[k_info].description = description
+    Returns
+    -------
+    dict
+        Dictionary with parameter names as keys and (type, description) tuples as values
+
+    Notes
+    -----
+    Used in load function. Should be made staticmethod of Model class.
     """
     if s:
-        p = dict()
+        p = {}
 
         for iss, ss in enumerate(s.splitlines()):
-            ss_split = ss.split(' : ')
+            ss_split = ss.split(" : ")
 
             if len(ss_split) > 1:
                 k = ss_split[0].strip()
 
-                p[k] = od()
+                p[k] = OrderedDict()
                 typed = ss_split[1].capitalize()
 
                 text = []
                 isss = iss
                 while True:
                     isss += 1
-                    sss = s.splitlines()[isss].split('        ')
+                    sss = s.splitlines()[isss].split("        ")
 
                     if len(sss) > 1:
                         text.append(sss[1])
@@ -55,7 +61,7 @@ def get_doc_info(s):
                     else:
                         break
 
-                description = ' '.join(text).capitalize()
+                description = " ".join(text).capitalize()
                 p[k] = typed, description
         return p
     else:
@@ -63,11 +69,32 @@ def get_doc_info(s):
 
 
 def load_package(instance):
+    """Load package parameters from a Flopy package instance.
+
+    Extracts parameters from a Flopy package instance using inspection
+    and docstring parsing.
+
+    Parameters
+    ----------
+    instance : object
+        Flopy package instance to extract parameters from
+
+    Returns
+    -------
+    collections.OrderedDict
+        Ordered dictionary of Parameter objects keyed by parameter name
+    """
     omitted_keys = [
-        'self', 'kwargs', 'args', 'xul', 'yul', 'rotation', 'proj4_str',
-        'start_datetime'
+        "self",
+        "kwargs",
+        "args",
+        "xul",
+        "yul",
+        "rotation",
+        "proj4_str",
+        "start_datetime",
     ]
-    none_ansd_keys = ['model']
+    none_ansd_keys = ["model"]
 
     # retreives the instance parameter using inspect
     params = inspect.signature(instance.__init__).parameters
@@ -77,10 +104,9 @@ def load_package(instance):
     info = get_doc_info(s)
 
     # store each parameter in an ordered dict as type Parameter
-    p = od()
+    p = OrderedDict()
 
     for k, v in params.items():
-
         # skip funny keys
         if k in omitted_keys:
             continue
@@ -91,7 +117,6 @@ def load_package(instance):
 
         # For other parameters create value, either from default
         else:
-
             # If an instance was passed it has loaded values in __dict__
             if k in instance.__dict__:
                 p[k] = Parameter(instance.__getattribute__(k))
@@ -113,21 +138,40 @@ def load_package(instance):
     return p
 
 
-class Model(object):
-    """
-    For now at least the following need to be loaded if
-    one would like to add any packages from that model
-        - mf: dis
-        - mt: btn
-        - swt: dis
+class Model:
+    """MODFLOW model parser and script generator.
+
+    This class handles loading MODFLOW models from name files, extracting
+    package parameters, and generating corresponding Flopy Python scripts
+    and Jupyter notebooks.
+
+    Notes
+    -----
+    The following packages need to be loaded for adding other packages:
+        - mf: dis (discretization)
+        - mt: btn (basic transport)
+        - swt: dis (discretization)
     """
 
     possible_sw_packages = flopy.seawat.Seawat().mfnam_packages
-    possible_sw_packages['flopy.modflow'] = flopy.modflow.Modflow
-    possible_sw_packages['flopy.mt3d'] = flopy.mt3d.Mt3dms
-    possible_sw_packages['flopy.seawat'] = flopy.seawat.Seawat
+    possible_sw_packages["flopy.modflow"] = flopy.modflow.Modflow
+    possible_sw_packages["flopy.mt3d"] = flopy.mt3d.Mt3dms
+    possible_sw_packages["flopy.seawat"] = flopy.seawat.Seawat
 
-    def __init__(self, load_nam='', add_pack=[], load_only=None):
+    def __init__(self, load_nam="", add_pack=None, load_only=None):
+        """Initialize Model instance.
+
+        Parameters
+        ----------
+        load_nam : str, optional
+            Path to MODFLOW name file to load
+        add_pack : list, optional
+            List of additional package names to include
+        load_only : list, optional
+            List of specific packages to load (others ignored)
+        """
+        if add_pack is None:
+            add_pack = []
         add_pack = list(add_pack)
         assert isinstance(add_pack, list), repr(add_pack)
 
@@ -135,27 +179,26 @@ class Model(object):
             assert i_pack in self.possible_sw_packages.keys()
 
         if load_nam:
-
             self.load_nam = Path(load_nam)
 
-            assert self.load_nam.is_file(
-            ), 'The passed nam file doesnt exist anymore'
+            assert self.load_nam.is_file(), "The passed nam file doesnt exist anymore"
 
             f, model_ws = str(self.load_nam.name), str(self.load_nam.parent)
 
             self.sw = flopy.seawat.Seawat.load(
                 f,
-                version='seawat',
-                exe_name='swt_v4',
+                version="seawat",
+                exe_name="swt_v4",
                 verbose=False,
                 model_ws=model_ws,
-                load_only=load_only)
+                load_only=load_only,
+            )
 
-            assert self.sw, 'Could not load namefile {}'.format(f)
+            assert self.sw, f"Could not load namefile {f}"
             # assert self.sw.load_fail is False  # Doesnt work for seawat
 
             self.sw.array_free_format = True
-            bas = self.sw.get_package('BAS6')
+            bas = self.sw.get_package("BAS6")
 
             # if bas:
             bas.ifrefm = True
@@ -168,72 +211,70 @@ class Model(object):
         packagelist += add_pack
 
         if not packagelist:
-            os.error('Noting to do')
+            OSError("Noting to do")
 
-        loaded_parameters = od()
-        loaded_packages = od()
+        loaded_parameters = OrderedDict()
+        loaded_packages = OrderedDict()
 
         for name in packagelist:
-            pm = od()
-            pm['name'] = name
+            pm = OrderedDict()
+            pm["name"] = name
 
-            pm['class'] = self.possible_sw_packages[name.lower()]
-            pm['parent_str'] = inspect.getmodule(pm['class']).__package__
+            pm["class"] = self.possible_sw_packages[name.lower()]
+            pm["parent_str"] = inspect.getmodule(pm["class"]).__package__
 
             if name in packagelist and name not in add_pack:
                 # if in add_pack the default will be used
-                pm['loaded'] = True
-                pm['instance'] = self.sw.get_package(name=name)
+                pm["loaded"] = True
+                pm["instance"] = self.sw.get_package(name=name)
 
             else:
-                pm['loaded'] = False
+                pm["loaded"] = False
 
                 try:
-                    pm['instance'] = pm['class'](model=self.sw)
+                    pm["instance"] = pm["class"](model=self.sw)
 
-                except:
-                    print('{0} Doesnt initiate using loaded or default values'.
-                          format(name))
-                    pm['instance'] = pm['class']
+                except Exception:
+                    print(f"{name} Doesnt initiate using loaded or default values")
+                    pm["instance"] = pm["class"]
                     # continue
 
             try:
-                p = load_package(pm['instance'])
+                p = load_package(pm["instance"])
 
                 loaded_parameters[name] = p
                 loaded_packages[name] = pm
 
-            except:
-                print('{0} failed to load'.format(name))
+            except Exception:
+                print(f"{name} failed to load")
                 continue
 
         # Order and include 'flopy.modflow', 'flopy.mt3d', 'flopy.seawat'
-        self.parameters = od()
-        self.packages = od()
+        self.parameters = OrderedDict()
+        self.packages = OrderedDict()
 
-        all_modules = ['flopy.modflow', 'flopy.mt3d', 'flopy.seawat']
-        unique_modules = set(
-            [item['parent_str'] for name, item in loaded_packages.items()])
+        all_modules = ["flopy.modflow", "flopy.mt3d", "flopy.seawat"]
+        unique_modules = {item["parent_str"] for name, item in loaded_packages.items()}
 
-        if 'flopy.mt3d' in unique_modules and 'flopy.seawat' not in unique_modules:
+        if "flopy.mt3d" in unique_modules and "flopy.seawat" not in unique_modules:
             # mt3d requires a seperate mf and mt3d run
 
             for mod in [item for item in all_modules if item in unique_modules]:
-                pm = od()
-                pm['name'] = mod
+                pm = OrderedDict()
+                pm["name"] = mod
 
-                pm['class'] = self.possible_sw_packages[mod]
-                pm['parent_str'] = 'flopy'
-                pm['loaded'] = False
-                pm['instance'] = pm['class']()
+                pm["class"] = self.possible_sw_packages[mod]
+                pm["parent_str"] = "flopy"
+                pm["loaded"] = False
+                pm["instance"] = pm["class"]()
 
                 self.packages[mod] = pm
-                self.parameters[mod] = load_package(pm['instance'])
+                self.parameters[mod] = load_package(pm["instance"])
 
-                for name, item in loaded_packages.items():
-                    assert name in loaded_parameters, 'Each loaded package should have a loaded self.parameters'
+                for name, _item in loaded_packages.items():
+                    assert name in loaded_parameters, "Each loaded package should have a loaded self.parameters"
 
-                    if loaded_packages[name]['parent_str'] != mod:
+                    if loaded_packages[name]["parent_str"] != mod:
                         continue
 
                     self.packages[name] = loaded_packages[name]
@@ -241,31 +282,31 @@ class Model(object):
 
         else:
             # a single main_model to attach the packages to
-            if 'flopy.seawat' in unique_modules:
-                main_model = 'flopy.seawat'
+            if "flopy.seawat" in unique_modules:
+                main_model = "flopy.seawat"
 
-            elif 'flopy.mt3d' in unique_modules:
-                main_model = 'flopy.mt3d'
+            elif "flopy.mt3d" in unique_modules:
+                main_model = "flopy.mt3d"
 
             else:
-                main_model = 'flopy.modflow'
+                main_model = "flopy.modflow"
 
-            pm = od()
-            pm['name'] = main_model
+            pm = OrderedDict()
+            pm["name"] = main_model
 
-            pm['class'] = self.possible_sw_packages[main_model]
-            pm['parent_str'] = 'flopy'
-            pm['loaded'] = False
-            pm['instance'] = pm['class']()
+            pm["class"] = self.possible_sw_packages[main_model]
+            pm["parent_str"] = "flopy"
+            pm["loaded"] = False
+            pm["instance"] = pm["class"]()
 
             self.packages[main_model] = pm
-            self.parameters[main_model] = load_package(pm['instance'])
+            self.parameters[main_model] = load_package(pm["instance"])
 
             for mod in [item for item in all_modules if item in unique_modules]:
-                for name, item in loaded_packages.items():
-                    assert name in loaded_parameters, 'Each loaded package should have a loaded self.parameters'
+                for name, _item in loaded_packages.items():
+                    assert name in loaded_parameters, "Each loaded package should have a loaded self.parameters"
 
-                    if loaded_packages[name]['parent_str'] != mod:
+                    if loaded_packages[name]["parent_str"] != mod:
                         continue
 
                     self.packages[name] = loaded_packages[name]
@@ -275,37 +316,50 @@ class Model(object):
             self.script_sanitize_parentmodel(main_model)
 
         self.script_sanitize_ncomp()
-        self.script_sanitize_BTN_mfenheriting()
+        self.script_sanitize_btn_mfenheriting()
         self.script_sanitize_unwanted_parameters()
         self.script_sanitize_return_all_data()
         # self.script_sanitize_ensure_2d()git remote set-url origin git@github.com:someuser/newprojectname.git
 
     def script_sanitize_parentmodel(self, main_model):
-        parent = main_model.split('.')[1]
+        parent = main_model.split(".")[1]
 
         for p, v in self.parameters.items():
             # if 'model' in v:
             #     v['model'].value = v['parent_str'].split('.')[-1].lower()
 
-            if 'model' in v:
-                v['model'].value = parent
+            if "model" in v:
+                v["model"].value = parent
 
-            if 'modflowmodel' in v:
+            if "modflowmodel" in v:
                 # in flopy.mt3d and flopy.seawat
-                del v['modflowmodel']
+                del v["modflowmodel"]
 
-            if 'mt3dmodel' in self.parameters[p]:
+            if "mt3dmodel" in self.parameters[p]:
                 # in flopy.seawat
-                del v['mt3dmodel']
+                del v["mt3dmodel"]
 
     def script_sanitize_modelname(self, name):
         for pack_key, pack_val in self.parameters.items():
-            if 'modelname' in pack_val:
-                self.parameters[pack_key]['modelname'].value = name
+            if "modelname" in pack_val:
+                self.parameters[pack_key]["modelname"].value = name
 
     def get_package_constructor(self, name, use_defaults=False):
-        """Constructs a package instance with """
-        constructor = self.packages[name.upper()]['class']
+        """Get package constructor with loaded parameters.
+
+        Parameters
+        ----------
+        name : str
+            Package name
+        use_defaults : bool, optional
+            Whether to use default values instead of loaded values
+
+        Returns
+        -------
+        functools.partial
+            Partial function for constructing the package
+        """
+        constructor = self.packages[name.upper()]["class"]
 
         p = self.parameters[name]
         keys = p.keys()
@@ -314,74 +368,68 @@ class Model(object):
         else:
             values = [p[k].value for k in keys]
 
-        kwargs = dict(zip(keys, values))
+        kwargs = dict(zip(keys, values, strict=False))
 
-        kwargs['model'] = self.sw
-        del kwargs['extension']
+        kwargs["model"] = self.sw
+        del kwargs["extension"]
 
         return partial(constructor, **kwargs)
 
     def cat_package_file(self, name):
+        """Print the content of the package file.
+
+        Parameters
+        ----------
+        name : str
+            The package acronym
         """
-        Print the content of the package file
-        :param name: The package acronym
-        """
-        path = Path(self.packages[name.upper()]['instance'].fn_path)
-        with open(path, 'r') as file:
+        path = Path(self.packages[name.upper()]["instance"].fn_path)
+        with open(path) as file:
             s = file.read()
 
-        print('\n'.join(
-            [str(path.absolute()),
-             len(str(path.absolute())) * '-', s]))
+        print("\n".join([str(path.absolute()), len(str(path.absolute())) * "-", s]))
 
-    def script_kwargs2string(self,
-                             name,
-                             print_descr=True,
-                             width=99,
-                             bonus_space=0,
-                             use_yapf=True):
+    def script_kwargs2string(self, name, print_descr=True, width=99, bonus_space=0, use_yapf=True):
         sout = [
-            v.print_string2(
-                k, width=width, bonus_space=bonus_space, use_yapf=use_yapf)
+            v.print_string2(k, width=width, bonus_space=bonus_space, use_yapf=use_yapf)
             for k, v in self.parameters[name].items()
         ]
 
         if print_descr:
-            descr = [
-                v.print_descr(width=width, bonus_space=bonus_space)
-                for _, v in self.parameters[name].items()
-            ]
+            descr = [v.print_descr(width=width, bonus_space=bonus_space) for _, v in self.parameters[name].items()]
 
             # zip the two lists, then flatten them using itertools, then remove empty lines. Empty lines originate from
             # when the docstring has no description for the specific parameter
-            out = [i for i in chain(*zip(descr, sout)) if i != '']
+            out = [i for i in chain(*zip(descr, sout, strict=False)) if i != ""]
 
-            return '\n'.join(out)
+            return "\n".join(out)
 
         else:
-            return '\n'.join(sout)
+            return "\n".join(sout)
 
-    def script_constructor2string(self,
-                                  name,
-                                  width=99,
-                                  bonus_space=0,
-                                  use_yapf=True):
-        style = '{based_on_style: google, indent_width: 4, split_before_named_assigns: False, column_limit: ' + str(
-            width) + ', SPLIT_ARGUMENTS_WHEN_COMMA_TERMINATED:True}'
+    def script_constructor2string(self, name, width=99, bonus_space=0, use_yapf=True):
+        style = (
+            "{based_on_style: google, indent_width: 4, split_before_named_assigns: False, column_limit: "
+            + str(width)
+            + ", SPLIT_ARGUMENTS_WHEN_COMMA_TERMINATED:True}"
+        )
 
-        initial_indent = ' ' * bonus_space
+        initial_indent = " " * bonus_space
 
         k = self.parameters[name].keys()
-        kwargs = ', '.join(map(''.join, zip(k, 500 * ['='], k)))
+        kwargs = ", ".join(map("".join, zip(k, 500 * ["="], k, strict=False)))
 
-        prelude = name.split('.')[-1].lower() + ' = '
-        prelude2 = initial_indent + \
-                   prelude + \
-                   self.packages[name]['class'].__module__ + '.' + \
-                   self.packages[name]['class'].__name__ + \
-                   '('
+        prelude = name.split(".")[-1].lower() + " = "
+        prelude2 = (
+            initial_indent
+            + prelude
+            + self.packages[name]["class"].__module__
+            + "."
+            + self.packages[name]["class"].__name__
+            + "("
+        )
 
-        s = prelude2 + kwargs + ')'
+        s = prelude2 + kwargs + ")"
 
         if use_yapf:
             s2 = FormatCode(s, style_config=style)[0][:-1]
@@ -390,36 +438,28 @@ class Model(object):
             sout = textwrap.wrap(
                 s,
                 width=width,
-                initial_indent=' ' * bonus_space,
-                subsequent_indent=' ' * (bonus_space + len(prelude2)),
+                initial_indent=" " * bonus_space,
+                subsequent_indent=" " * (bonus_space + len(prelude2)),
                 break_on_hyphens=False,
-                break_long_words=False)
-            s2 = '\n'.join(sout)
+                break_long_words=False,
+            )
+            s2 = "\n".join(sout)
 
         return s2
 
-    def script_package2string(self,
-                              name,
-                              print_descr=True,
-                              width=99,
-                              bonus_space=0,
-                              use_yapf=True):
+    def script_package2string(self, name, print_descr=True, width=99, bonus_space=0, use_yapf=True):
         kwargs = self.script_kwargs2string(
             name,
             print_descr=print_descr,
             width=width,
             bonus_space=bonus_space,
-            use_yapf=use_yapf)
-        constr = self.script_constructor2string(
-            name, width=width, bonus_space=bonus_space, use_yapf=use_yapf)
+            use_yapf=use_yapf,
+        )
+        constr = self.script_constructor2string(name, width=width, bonus_space=bonus_space, use_yapf=use_yapf)
 
-        return ''.join([kwargs, '\n\n', constr])
+        return "".join([kwargs, "\n\n", constr])
 
-    def script_model2string(self,
-                            print_descr=True,
-                            width=99,
-                            bonus_space=0,
-                            use_yapf=True):
+    def script_model2string(self, print_descr=True, width=99, bonus_space=0, use_yapf=True):
         self.script_sanitize_modelname(self.sw.name)
 
         out = [self.import_statements()]
@@ -431,16 +471,14 @@ class Model(object):
                     print_descr=print_descr,
                     width=width,
                     bonus_space=bonus_space,
-                    use_yapf=use_yapf))
+                    use_yapf=use_yapf,
+                )
+            )
 
         out.append(self.write_run_statements())
-        return '\n\n####################\n'.join(out)
+        return "\n\n####################\n".join(out)
 
-    def script_model2nb(self,
-                        print_descr=True,
-                        width=99,
-                        bonus_space=0,
-                        use_yapf=True):
+    def script_model2nb(self, print_descr=True, width=99, bonus_space=0, use_yapf=True):
         """http://nbviewer.jupyter.org/gist/fperez/9716279"""
         self.script_sanitize_modelname(self.sw.name)
 
@@ -448,11 +486,11 @@ class Model(object):
 
         out = [
             nbf.v4.new_markdown_cell(self.intro(self.sw.name)),
-            nbf.v4.new_code_cell(self.import_statements())
+            nbf.v4.new_code_cell(self.import_statements()),
         ]
 
-        for name, item in self.packages.items():
-            out.append(nbf.v4.new_markdown_cell('## {0}'.format(name)))
+        for name, _item in self.packages.items():
+            out.append(nbf.v4.new_markdown_cell(f"## {name}"))
             out.append(
                 nbf.v4.new_code_cell(
                     self.script_package2string(
@@ -460,42 +498,43 @@ class Model(object):
                         print_descr=print_descr,
                         width=width,
                         bonus_space=bonus_space,
-                        use_yapf=use_yapf)))
+                        use_yapf=use_yapf,
+                    )
+                )
+            )
 
-        out.append(nbf.v4.new_markdown_cell('# Run this thing!'))
+        out.append(nbf.v4.new_markdown_cell("# Run this thing!"))
         out.append(nbf.v4.new_code_cell(self.write_run_statements()))
-        nb['cells'] = out
+        nb["cells"] = out
         return nb
 
-    def write_script_model2string(self,
-                                  fn='',
-                                  print_descr=True,
-                                  width=99,
-                                  bonus_space=0,
-                                  use_yapf=True):
+    def write_script_model2string(self, fn="", print_descr=True, width=99, bonus_space=0, use_yapf=True):
         nb = self.script_model2nb(
             print_descr=print_descr,
             width=width,
             bonus_space=bonus_space,
-            use_yapf=use_yapf)
+            use_yapf=use_yapf,
+        )
 
-        with open(fn, 'w') as file:
+        with open(fn, "w") as file:
             nbf.write(nb, file)
 
     @staticmethod
     def intro(title):
-        return '# ' + title + '\n' + \
-               'This is a file is written using a pre-release version of the meta-flopy-scripting package\n\n' + \
-               'Using flopy version {0}'.format(flopy.__version__)
+        return (
+            "# "
+            + title
+            + "\n"
+            + "This is a file is written using a pre-release version of the meta-flopy-scripting package\n\n"
+            + f"Using flopy version {flopy.__version__}"
+        )
 
     @staticmethod
     def import_statements():
-        return 'import flopy\n' + \
-               'import numpy as np\n' + \
-               'from numpy import rec'
+        return "import flopy\n" + "import numpy as np\n" + "from numpy import rec"
 
     def write_run_statements(self, write_input=True, run_model=False):
-        modules = ['flopy.seawat', 'flopy.mt3d', 'flopy.modflow']
+        modules = ["flopy.seawat", "flopy.mt3d", "flopy.modflow"]
 
         for modules_item in modules:
             if modules_item not in self.parameters:
@@ -503,38 +542,44 @@ class Model(object):
             else:
                 break
 
-        s1_ = '{0}.write_input()'.format(modules_item.split('.')[-1])
-        s2_ = '{0}.run_model()'.format(modules_item.split('.')[-1])
+        s1_ = "{}.write_input()".format(modules_item.split(".")[-1])
+        s2_ = "{}.run_model()".format(modules_item.split(".")[-1])
 
         if write_input:
             s1 = s1_
 
         else:
-            s1 = '# ' + s1_
+            s1 = "# " + s1_
 
         if run_model:
             s2 = s2_
 
         else:
-            s2 = '# ' + s2_
+            s2 = "# " + s2_
 
-        return '\n'.join((s1, s2))
+        return "\n".join((s1, s2))
 
     def script_sanitize_ncomp(self):
-        """
-        The user is required to enter a kwarg per parameter per species. When loading from file, the parameters are
-        loaded for all species into a single list. Thus the list is split up into separate kwargs
+        """Sanitize multi-component transport parameters.
 
-        :return:
+        The user is required to enter a kwarg per parameter per species.
+        When loading from file, the parameters are loaded for all species
+        into a single list. This method splits the list up into separate kwargs.
         """
         import copy
 
-        if 'BTN' not in self.parameters:
+        if "BTN" not in self.parameters:
             return
 
-        ncomp_adjusts = [['DSP', 'dmcoef'], ['BTN', 'sconc'], ['RCT', 'sp1'],
-                         ['RCT', 'sp2'], ['RCT', 'rc1'], ['RCT', 'rc2'],
-                         ['RCT', 'srconc']]
+        ncomp_adjusts = [
+            ["DSP", "dmcoef"],
+            ["BTN", "sconc"],
+            ["RCT", "sp1"],
+            ["RCT", "sp2"],
+            ["RCT", "rc1"],
+            ["RCT", "rc2"],
+            ["RCT", "srconc"],
+        ]
 
         for name, par_name in ncomp_adjusts:
             if name in self.parameters:
@@ -547,38 +592,47 @@ class Model(object):
                     else:
                         key = par_name + str(icomp + 1)
 
-                    if par_name == 'dmcoef' and dmcoef_item.value.ndim == 1 and dmcoef_item.value.size > 1:
-                        nlay = int(self.parameters['BTN']['nlay'].value)
-                        shape = (nlay, 1)
+                    if par_name == "dmcoef" and dmcoef_item.value.ndim == 1 and dmcoef_item.value.size > 1:
+                        int(self.parameters["BTN"]["nlay"].value)
                         dmcoef_item.value = dmcoef_item.value[:, None]
 
                     self.parameters[name][key] = Parameter(dmcoef_item)
-                    self.parameters[name][
-                        key].description = dmcoef_old.description
+                    self.parameters[name][key].description = dmcoef_old.description
 
-    def script_sanitize_BTN_mfenheriting(self):
+    def script_sanitize_btn_mfenheriting(self):
         # Set these variables from the Modflow model (self.parent.mf) unless
         # they are specified in the constructor.
         # self.setmodflowvars(nlay, nrow, ncol, nper, laycon, delr, delc, htop,
         #                     dz, perlen, nstp, tsmult)
 
-        if 'BTN' not in self.parameters:
+        if "BTN" not in self.parameters:
             return
 
         del_items = [
-            'nlay', 'nrow', 'ncol', 'nper', 'laycon', 'delr', 'delc', 'htop',
-            'dz', 'perlen', 'nstp', 'tsmult'
+            "nlay",
+            "nrow",
+            "ncol",
+            "nper",
+            "laycon",
+            "delr",
+            "delc",
+            "htop",
+            "dz",
+            "perlen",
+            "nstp",
+            "tsmult",
         ]
 
         for key in del_items:
-            del self.parameters['BTN'][key]
+            del self.parameters["BTN"][key]
 
     def change_package_parameter(self, d):
-        """
-        d = {package name: {key_name: value}}
+        """Change parameters for specific packages.
 
-        :param d:
-        :return:
+        Parameters
+        ----------
+        d : dict
+            Nested dictionary with structure {package_name: {key_name: value}}
         """
         for pack_name_item, pack_val_item in d.items():
             for key_name_item, key_val_item in pack_val_item.items():
@@ -588,40 +642,47 @@ class Model(object):
 
                 # Activates the setter of the Parameter.value
                 if pack_name_item in self.parameters:
-                    self.parameters[pack_name_item][
-                        key_name_item].value = key_val_item
+                    self.parameters[pack_name_item][key_name_item].value = key_val_item
 
     def change_all_pack_parameter(self, d):
-        """
-        d = {key_name: value}
+        """Change parameter values across all packages.
 
-        iterates over all packages
+        Iterates over all packages and updates specified parameters.
 
-        :param d:
-        :return:
+        Parameters
+        ----------
+        d : dict
+            Dictionary with structure {key_name: value}
         """
         for pack_name_item, pack_val_item in self.parameters.items():
             for key_name_item, key_val_item in d.items():
-                s = "Looking for {0} in {1}".format(key_name_item,
-                                                    pack_name_item)
+                s = f"Looking for {key_name_item} in {pack_name_item}"
                 print(s)
 
                 if key_name_item not in pack_val_item:
                     continue
 
                 else:
-                    s = "Changing {0} in package {1} to {2}".format(
-                        key_name_item, pack_name_item, key_val_item)
+                    s = f"Changing {key_name_item} in package {pack_name_item} to {key_val_item}"
                     print(s)
                     # Activates the setter of the Parameter.value
-                    self.parameters[pack_name_item][key_name_item] = Parameter(
-                        key_val_item)
+                    self.parameters[pack_name_item][key_name_item] = Parameter(key_val_item)
 
     def script_sanitize_unwanted_parameters(self):
         unwanted = [
-            'extension', 'unitnumber', 'filenames', 'ftlfree', 'ftlunit',
-            'MFStyleArr', 'DRYCell', 'Legacy99Stor', 'FTLPrint',
-            'NoWetDryPrint', 'OmitDryBud', 'AltWTSorb', 'dtype'
+            "extension",
+            "unitnumber",
+            "filenames",
+            "ftlfree",
+            "ftlunit",
+            "MFStyleArr",
+            "DRYCell",
+            "Legacy99Stor",
+            "FTLPrint",
+            "NoWetDryPrint",
+            "OmitDryBud",
+            "AltWTSorb",
+            "dtype",
         ]
 
         for unwanted_item in unwanted:
@@ -630,9 +691,7 @@ class Model(object):
                     del self.parameters[key][unwanted_item]
 
     def script_sanitize_return_all_data(self):
-        mal_params = {
-            'DRT': ['options'],
-            'LAK': ['flux_data', 'sill_data']}
+        mal_params = {"DRT": ["options"], "LAK": ["flux_data", "sill_data"]}
         for pck, params in mal_params.items():
             for param in params:
                 if pck in self.parameters:
