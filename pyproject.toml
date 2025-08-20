@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "flopyparser"
-version = "1.0.0"
+version = "2.0.0"
 description = "Converts MODFLOW input files to a Python Flopy script"
 authors = [
     {name = "Bas des Tombe", email = "bdestombe@gmail.com"},
@@ -35,9 +35,6 @@ dependencies = [
 dev = [
     "pytest>=6.0",
     "ruff>=0.1.0",
-]
-format = [
-    "yapf",
 ]
 
 [project.urls]
