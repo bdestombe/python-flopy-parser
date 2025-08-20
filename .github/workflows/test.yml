@@ -1,0 +1,28 @@
+name: Tests
+
+on:
+  push:
+    branches: [ master ]
+  pull_request:
+    branches: [ master ]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Install uv
+      uses: astral-sh/setup-uv@v3
+      with:
+        version: "latest"
+    
+    - name: Install dependencies
+      run: |
+        uv venv
+        uv pip install -e .
+        uv pip install pytest
+    
+    - name: Run tests with pytest
+      run: uv run pytest
